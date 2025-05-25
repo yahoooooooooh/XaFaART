@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习助手 - 艺术史与世界常识</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Admin Toggle Button -->
+    <button class="admin-toggle" id="adminToggle" title="管理题库">⚙️</button>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <h3>📚 题库管理</h3>
+        
+        <form class="admin-form" id="addQuizForm">
+            <label>学科分类</label>
+            <select id="subjectSelect" required>
+                <option value="">请选择学科</option>
+                <option value="western_art">西方艺术史</option>
+                <option value="chinese_art">中国美术史</option>
+                <option value="art_theory">艺术概论</option>
+                <option value="world_knowledge">世界常识</option>
+            </select>
+
+            <label>时期分类</label>
+            <select id="periodSelect" required>
+                <option value="">请先选择学科</option>
+            </select>
+            <input type="text" id="customPeriodInput" placeholder="或输入自定义分类名称" style="margin-top: 8px;">
+
+            <label>题库名称</label>
+            <input type="text" id="quizNameInput" placeholder="如：印象派初级题库、文史基础100题" required>
+
+            <label>题库描述</label>
+            <textarea id="quizDescInput" placeholder="简要描述这个题库的内容" rows="3"></textarea>
+
+            <label>难度等级</label>
+            <select id="difficultySelect" required>
+                <option value="easy">初级</option>
+                <option value="medium">中级</option>
+                <option value="hard">高级</option>
+            </select>
+
+            <label>预计用时</label>
+            <input type="text" id="estimatedTimeInput" placeholder="如：15-20分钟" required>
+
+            <button type="submit">✅ 添加题库</button>
+        </form>
+
+        <!-- 数据备份管理区域 -->
+        <div class="backup-section">
+            <h4>💾 数据备份管理</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <button type="button" id="backupDataBtn" style="background: #805ad5; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
+                    📦 备份数据
+                </button>
+                <button type="button" id="restoreDataBtn" style="background: #38a169; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
+                    📂 恢复数据
+                </button>
+            </div>
+            <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
+            <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;">
+                💡 <strong>使用说明：</strong><br>
+                • 备份：下载当前所有题库数据到本地JSON文件<br>
+                • 恢复：选择备份的JSON文件来恢复题库数据<br>
+                • 建议定期备份，防止数据丢失
+            </div>
+        </div>
+
+        <div class="quiz-data-editor">
+            <h4>📝 题目数据</h4>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                <p style="font-size: 0.9em; color: var(--text-muted); margin: 0; flex: 1;">
+                    在下方粘贴题目数据（JSON格式），点击"添加题库"时会自动读取
+                </p>
+                <button type="button" id="copyInstructionBtn" style="background: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; cursor: pointer; white-space: nowrap;">
+                    📄 获取AI生成指令
+                </button>
+            </div>
+            <textarea id="quizDataInput" placeholder='点击上方"📄 获取AI生成指令"按钮获取完整的题目生成指令（包含JSON格式示例）'></textarea>
+        </div>
+
+        <div class="quiz-list" id="quizList">
+            <h4>📋 现有题库</h4>
+            <div id="quizListContent">
+                <!-- 题库列表将在这里显示 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>学习助手</h1>
+            <p>探索艺术的无穷魅力与世界常识，从经典到现代，开启您的全面学习之旅</p>
+        </header>
+
+        <!-- Navigation Breadcrumb -->
+        <nav class="breadcrumb" id="breadcrumb">
+            <div class="breadcrumb-item current" data-level="home">
+                🏠 首页
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Content will be dynamically generated -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Quiz Container (内嵌题库引擎) -->
+    <div class="quiz-container embedded" id="quizContainer">
+        <div class="quiz-wrapper">
+            <header class="quiz-header">
+                <button class="quiz-close-btn" id="quizCloseBtn">×</button>
+                <h1 id="quizTitle">题库标题</h1>
+                <p id="quizSubtitle">题库描述</p>
+            </header>
+
+            <div class="progress-bar-container" id="progressBarContainer">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+
+            <div class="quiz-content-area" id="quizContentArea">
+                <div id="quiz-area">
+                    <!-- Single question will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="final-score-container" id="finalScoreContainer">
+                <div id="finalScoreSummary" class="final-score-summary">
+                    <!-- Final score will be shown here -->
+                </div>
+                <div class="final-score-actions">
+                    <button id="review-incorrect-btn" class="nav-btn">
+                        🔍 回顾错题
+                    </button>
+                    <button id="restart-btn" class="nav-btn">
+                        🔄 重新开始
+                    </button>
+                </div>
+            </div>
+
+            <div class="navigation-controls" id="navigationControls">
+                <div class="navigation-buttons">
+                    <button id="prev-btn" class="nav-btn">
+                        ← 上一题
+                    </button>
+                    <button id="submit-btn" class="submit-btn-single nav-btn">
+                        提交答案 ✓
+                    </button>
+                    <button id="next-btn" class="nav-btn">
+                        下一题 →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript modules in correct order -->
+    <script>
+        // ===== DATA MODULE =====
+        // 预定义的时期分类选项
+        const periodOptions = {
+            western_art: [
+                { id: 'ancient', name: '古典时期', description: '古希腊罗马艺术' },
+                { id: 'medieval', name: '中世纪', description: '拜占庭与哥特式艺术' },
+                { id: 'renaissance', name: '文艺复兴', description: '15-16世纪欧洲艺术复兴' },
+                { id: 'baroque', name: '巴洛克', description: '17-18世纪巴洛克艺术' },
+                { id: 'neoclassicism', name: '新古典主义', description: '18-19世纪新古典艺术' },
+                { id: 'romanticism', name: '浪漫主义', description: '18-19世纪浪漫主义艺术' },
+                { id: 'impressionism', name: '印象派', description: '19世纪法国印象派艺术运动' },
+                { id: 'post_impressionism', name: '后印象派', description: '19世纪末后印象派艺术' },
+                { id: 'modernism', name: '现代主义', description: '20世纪现代艺术运动' },
+                { id: 'contemporary', name: '当代艺术', description: '20世纪后期至今的艺术' }
+            ],
+            chinese_art: [
+                { id: 'ancient', name: '先秦时期', description: '商周青铜器与早期绘画' },
+                { id: 'han', name: '汉代', description: '汉代艺术与丝绸之路' },
+                { id: 'tang', name: '唐代', description: '盛唐艺术与国际交流' },
+                { id: 'song', name: '宋代', description: '宋代绘画与书法' },
+                { id: 'yuan', name: '元代', description: '元代文人画' },
+                { id: 'ming', name: '明代', description: '明代宫廷与民间艺术' },
+                { id: 'qing', name: '清代', description: '清代艺术与西方影响' },
+                { id: 'modern', name: '近现代', description: '19-20世纪中国艺术变革' },
+                { id: 'contemporary', name: '当代', description: '改革开放以来的中国艺术' }
+            ],
+            art_theory: [
+                { id: 'aesthetics', name: '美学理论', description: '艺术美学基础理论' },
+                { id: 'art_history', name: '艺术史学', description: '艺术史研究方法' },
+                { id: 'criticism', name: '艺术批评', description: '艺术批评理论与实践' },
+                { id: 'psychology', name: '艺术心理学', description: '艺术创作与欣赏心理' },
+                { id: 'sociology', name: '艺术社会学', description: '艺术与社会关系' },
+                { id: 'media', name: '媒介理论', description: '艺术媒介与技术' }
+            ],
+            world_knowledge: [
+                { id: 'liberal_arts', name: '文史哲综合', description: '文学、历史、哲学等人文学科基础常识' },
+                { id: 'law_politics', name: '法政常识', description: '法律法规、政治制度、时事政策等基础知识' },
+                { id: 'science_math', name: '理科综合', description: '数学、物理、化学、生物等自然科学基础' },
+                { id: 'engineering_tech', name: '工科技术', description: '工程技术、计算机科学、信息技术等应用知识' },
+                { id: 'agriculture', name: '农业科学', description: '农业技术、生态环境、食品安全等相关知识' },
+                { id: 'medicine_health', name: '医学健康', description: '基础医学、健康常识、疾病预防等医疗知识' },
+                { id: 'general_culture', name: '文化艺术', description: '文化常识、艺术鉴赏、社会生活等综合知识' },
+                { id: 'geography', name: '地理常识', description: '世界地理、中国地理、自然地理等知识' },
+                { id: 'economics', name: '经济学基础', description: '基础经济学原理、市场经济、金融常识' }
+            ]
+        };
+
+        // 题库数据存储
+        // 默认的 quizData 结构，确保所有学科都包含在内
+        const defaultInitialQuizData = {
+            "western_art": {
+                id: "western_art",
+                name: "西方艺术史",
+                description: "探索从古至今的西方艺术发展脉络，从古典主义到现代主义的艺术革命",
+                icon: "🎨",
+                periods: {
+                    "impressionism": { // 默认的示例数据
+                        id: "impressionism",
+                        name: "印象派",
+                        description: "19世纪法国印象派艺术运动，光与色彩的革命",
+                        icon: "🌅",
+                        quizzes: [
+                            {
+                                id: "impressionism_beginner",
+                                name: "印象派初级题库",
+                                description: "适合初学者的印象派基础知识测试",
+                                difficulty: "easy",
+                                estimatedTime: "15-20分钟",
+                                questions: [
+                                    {
+                                        section: "引言：定义印象派及其革命性影响",
+                                        question: "印象派的核心主张在于捕捉艺术家对特定场景的什么？",
+                                        options: [
+                                            "对象的精细、客观再现与历史细节",
+                                            "瞬间感官印象，尤其是光线与色彩的变幻",
+                                            "理想化的美学形态与神话叙事",
+                                            "深刻的社会批判与政治寓意"
+                                        ],
+                                        correctAnswer: 1,
+                                        explanation: "印象派的核心主张在于捕捉艺术家对特定场景的瞬间感官印象，而非追求对象的精细、客观再现。其艺术实践的核心在于对光线、色彩以及变幻莫测的瞬间的精妙运用。"
+                                    },
+                                    {
+                                        section: "引言：定义印象派及其革命性影响",
+                                        question: "\"印象派\"这一名称最初源于什么？",
+                                        options: [
+                                            "艺术家们对自己风格的精准定义",
+                                            "艺术评论家路易·勒鲁瓦对莫奈作品的讥讽性评论",
+                                            "法国美术学院对新兴画派的官方命名",
+                                            "观众对画展的普遍正面评价"
+                                        ],
+                                        correctAnswer: 1,
+                                        explanation: "\"印象派\"这一名称源于艺术评论家路易·勒鲁瓦对1874年首届印象派画展的讥讽性评论，特意针对克洛德·莫奈的作品《印象·日出》进行挖苦。"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            "chinese_art": {
+                id: "chinese_art",
+                name: "中国美术史",
+                description: "领略博大精深的中华艺术瑰宝，从古代到近现代的艺术传承",
+                icon: "🖌️",
+                periods: {} // 初始为空
+            },
+            "art_theory": {
+                id: "art_theory",
+                name: "艺术概论",
+                description: "艺术的本质、功能与审美理论，建立系统的艺术认知框架",
+                icon: "📚",
+                periods: {} // 初始为空
+            },
+            "world_knowledge": { // 确保 world_knowledge 在默认结构中
+                id: "world_knowledge",
+                name: "世界常识",
+                description: "涵盖文、法、理、工、农、医、艺等各领域的基础常识与核心知识",
+                icon: "🌍",
+                periods: { // 默认的示例数据
+                    "liberal_arts": {
+                        id: "liberal_arts",
+                        name: "文史哲综合",
+                        description: "文学、历史、哲学等人文学科的基础常识",
+                        icon: "📜",
+                        quizzes: []
+                    }
+                }
+            }
+        };
+        
+        // 深拷贝默认数据，避免直接修改 defaultInitialQuizData
+        let quizData = JSON.parse(localStorage.getItem('artQuizData')) || JSON.parse(JSON.stringify(defaultInitialQuizData));
+
+
+        // 数据管理器
+        const DataManager = {
+            getData() {
+                return quizData;
+            },
+
+            saveData() {
+                localStorage.setItem('artQuizData', JSON.stringify(quizData));
+            },
+
+            getPeriodOptions(subjectId) {
+                return periodOptions[subjectId] || [];
+            },
+
+            addQuiz(subjectId, periodData, newQuizData) { // changed quizData to newQuizData to avoid conflict
+                const subject = this.getData()[subjectId];
+                if (!subject) {
+                    throw new Error('所选学科不存在');
+                }
+
+                if (!subject.periods[periodData.id]) {
+                    subject.periods[periodData.id] = {
+                        id: periodData.id,
+                        name: periodData.name,
+                        description: periodData.description,
+                        icon: this.getRandomIcon(),
+                        quizzes: []
+                    };
+                }
+
+                subject.periods[periodData.id].quizzes.push(newQuizData);
+                this.saveData();
+            },
+
+            deleteQuiz(subjectId, periodId, quizId) {
+                const period = this.getData()[subjectId]?.periods[periodId];
+                if (!period) return false;
+
+                period.quizzes = period.quizzes.filter(quiz => quiz.id !== quizId);
+
+                if (period.quizzes.length === 0) {
+                    delete this.getData()[subjectId].periods[periodId];
+                }
+
+                this.saveData();
+                return true;
+            },
+
+            getQuiz(subjectId, periodId, quizId) {
+                return this.getData()[subjectId]?.periods[periodId]?.quizzes.find(q => q.id === quizId);
+            },
+
+            getRandomIcon() {
+                const icons = ['🎭', '🖼️', '🏛️', '🌸', '🏺', '📜', '🎪', '🎨', '🖌️', '✨', '💡', '⭐', '🔥', '🌟'];
+                return icons[Math.floor(Math.random() * icons.length)];
+            },
+
+            validateQuizData(data) {
+                try {
+                    if (!data || typeof data !== 'object') return false;
+
+                    for (const [subjectId, subject] of Object.entries(data)) {
+                        if (!subject.id || !subject.name || !subject.periods) return false;
+                        
+                        for (const [periodId, period] of Object.entries(subject.periods)) {
+                            if (!period.id || !period.name || !Array.isArray(period.quizzes)) return false;
+                            
+                            for (const quiz of period.quizzes) {
+                                if (!quiz.id || !quiz.name || !Array.isArray(quiz.questions)) return false;
+                                
+                                for (const question of quiz.questions) {
+                                    if (!question.question || !question.options || 
+                                        !Array.isArray(question.options) || 
+                                        question.options.length !== 4 || // Or check for options.length >= 2 if you allow more/less
+                                        typeof question.correctAnswer !== 'number' ||
+                                        question.correctAnswer < 0 || question.correctAnswer >= question.options.length) { // correctAnswer should be within options bounds
+                                        console.error("Invalid question structure:", question, "in quiz:", quiz.name);
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('数据验证错误:', error);
+                    return false;
+                }
+            },
+
+            getDataStatistics(data = null) {
+                const sourceData = data || this.getData();
+                let subjects = 0;
+                let periods = 0;
+                let quizzes = 0;
+                let questions = 0;
+
+                for (const subject of Object.values(sourceData)) {
+                    subjects++;
+                    if (subject.periods && typeof subject.periods === 'object') {
+                        for (const period of Object.values(subject.periods)) {
+                            periods++;
+                            if (period.quizzes && Array.isArray(period.quizzes)) {
+                                for (const quiz of period.quizzes) {
+                                    quizzes++;
+                                    if (quiz.questions && Array.isArray(quiz.questions)) {
+                                        questions += quiz.questions.length;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return { subjects, periods, quizzes, questions };
+            },
+
+            restoreData(newData) {
+                if (!this.validateQuizData(newData)) {
+                    throw new Error('数据格式验证失败');
+                }
+                quizData = newData; // Directly assign validated new data
+                this.saveData();
+            },
+
+            getBackupData() {
+                const now = new Date();
+                return {
+                    version: "1.0",
+                    exportTime: now.toISOString(),
+                    totalQuizzes: this.getDataStatistics().quizzes,
+                    data: this.getData()
+                };
+            }
+        };
+
+        // 确保数据结构完整 (MODIFIED IIFE)
+        (function initializeData() {
+            let dataWasModified = false;
+            // Use the same defaultInitialQuizData for consistency in structure
+            const defaultStructure = JSON.parse(JSON.stringify(defaultInitialQuizData));
+
+            // 1. 检查并修复顶层学科对象
+            for (const subjectKey in defaultStructure) {
+                if (!quizData.hasOwnProperty(subjectKey) || typeof quizData[subjectKey] !== 'object' || quizData[subjectKey] === null) {
+                    console.warn(`Subject key "${subjectKey}" missing or invalid in loaded quizData. Initializing with default structure.`);
+                    quizData[subjectKey] = JSON.parse(JSON.stringify(defaultStructure[subjectKey]));
+                    dataWasModified = true;
+                } else {
+                    // 确保基本属性存在
+                    if (!quizData[subjectKey].id) { quizData[subjectKey].id = defaultStructure[subjectKey].id; dataWasModified = true; }
+                    if (!quizData[subjectKey].name) { quizData[subjectKey].name = defaultStructure[subjectKey].name; dataWasModified = true; }
+                    if (!quizData[subjectKey].description) { quizData[subjectKey].description = defaultStructure[subjectKey].description; dataWasModified = true; }
+                    if (!quizData[subjectKey].icon) { quizData[subjectKey].icon = defaultStructure[subjectKey].icon; dataWasModified = true; }
+
+                    // 如果学科存在，但缺少 periods 对象，则添加
+                    if (typeof quizData[subjectKey].periods !== 'object' || quizData[subjectKey].periods === null) {
+                        console.warn(`Periods object missing for subject "${subjectKey}". Initializing.`);
+                        quizData[subjectKey].periods = JSON.parse(JSON.stringify(defaultStructure[subjectKey].periods)) || {};
+                        dataWasModified = true;
+                    } else {
+                        // 如果 periods 对象存在，可以进一步检查其中的默认时期
+                        for (const periodKey in defaultStructure[subjectKey].periods) {
+                            if (!quizData[subjectKey].periods.hasOwnProperty(periodKey) || 
+                                typeof quizData[subjectKey].periods[periodKey] !== 'object' ||
+                                quizData[subjectKey].periods[periodKey] === null) {
+                                console.warn(`Default period "${periodKey}" missing in subject "${subjectKey}". Initializing.`);
+                                quizData[subjectKey].periods[periodKey] = JSON.parse(JSON.stringify(defaultStructure[subjectKey].periods[periodKey]));
+                                dataWasModified = true;
+                            } else {
+                                // 确保默认时期的基本属性
+                                const defaultPeriod = defaultStructure[subjectKey].periods[periodKey];
+                                const currentPeriod = quizData[subjectKey].periods[periodKey];
+                                if (!currentPeriod.id) { currentPeriod.id = defaultPeriod.id; dataWasModified = true; }
+                                if (!currentPeriod.name) { currentPeriod.name = defaultPeriod.name; dataWasModified = true; }
+                                if (!currentPeriod.description) { currentPeriod.description = defaultPeriod.description; dataWasModified = true; }
+                                if (!currentPeriod.icon) { currentPeriod.icon = defaultPeriod.icon; dataWasModified = true; }
+                                if (!Array.isArray(currentPeriod.quizzes)) { currentPeriod.quizzes = []; dataWasModified = true; }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (dataWasModified) {
+                console.log("QuizData was modified during initialization to ensure structural integrity. Saving to localStorage.");
+                DataManager.saveData();
+            } else {
+                console.log("QuizData loaded from localStorage is structurally sound or default data used.");
+            }
+        })();
+    </script>
+    
+    <script>
+        // ===== QUIZ ENGINE =====
+        class QuizEngine {
+            constructor() {
+                this.currentQuizData = null;
+                this.currentQuestionIndex = 0;
+                this.userAnswers = [];
+                this.answeredStatus = [];
+                this.score = 0;
+                this.incorrectQuestions = [];
+                this.currentIncorrectReviewIndex = 0;
+                this.quizStartTime = null;
+                this.quizEndTime = null;
+                this.isReviewMode = false;
+                
+                this.initElements();
+                this.setupEventListeners();
+            }
+
+            initElements() {
+                this.quizContainer = document.getElementById('quizContainer');
+                this.quizTitle = document.getElementById('quizTitle');
+                this.quizSubtitle = document.getElementById('quizSubtitle');
+                this.quizContentArea = document.getElementById('quizContentArea');
+                this.quizArea = document.getElementById('quiz-area');
+                this.finalScoreContainer = document.getElementById('finalScoreContainer');
+                this.finalScoreSummaryDiv = document.getElementById('finalScoreSummary');
+                this.progressBarContainer = document.getElementById('progressBarContainer');
+                this.progressBar = document.getElementById('progressBar');
+                this.prevBtn = document.getElementById('prev-btn');
+                this.nextBtn = document.getElementById('next-btn');
+                this.submitBtn = document.getElementById('submit-btn');
+                this.restartBtn = document.getElementById('restart-btn');
+                this.reviewIncorrectBtn = document.getElementById('review-incorrect-btn');
+                this.navigationControls = document.getElementById('navigationControls');
+                this.quizCloseBtn = document.getElementById('quizCloseBtn');
+            }
+
+            setupEventListeners() {
+                this.prevBtn.addEventListener('click', () => this.handlePrevious());
+                this.nextBtn.addEventListener('click', () => this.handleNext());
+                this.submitBtn.addEventListener('click', () => this.handleSubmit());
+                this.restartBtn.addEventListener('click', () => this.restart());
+                this.reviewIncorrectBtn.addEventListener('click', () => this.startReviewIncorrect());
+                this.quizCloseBtn.addEventListener('click', () => this.close());
+            }
+
+            start(subjectId, periodId, quizId) {
+                const quiz = DataManager.getQuiz(subjectId, periodId, quizId);
+                if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+                    alert('题库数据错误或为空！');
+                    return;
+                }
+
+                this.currentQuizData = quiz.questions;
+                this.quizTitle.textContent = quiz.name;
+                this.quizSubtitle.textContent = quiz.description;
+
+                this.init();
+                this.show();
+            }
+
+            init() {
+                this.currentQuestionIndex = 0;
+                this.userAnswers = new Array(this.currentQuizData.length).fill(null);
+                this.answeredStatus = new Array(this.currentQuizData.length).fill(false);
+                this.score = 0;
+                this.incorrectQuestions = [];
+                this.isReviewMode = false;
+                this.quizStartTime = new Date();
+                
+                this.quizContentArea.style.display = 'block';
+                this.navigationControls.style.display = 'block';
+                this.progressBarContainer.style.display = 'block';
+                this.finalScoreContainer.style.display = 'none';
+                
+                this.displayQuestion(this.currentQuestionIndex);
+            }
+
+            show() {
+                this.quizContainer.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            close() {
+                this.quizContainer.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                this.reset();
+            }
+
+            reset() {
+                this.currentQuizData = null;
+                this.currentQuestionIndex = 0;
+                this.userAnswers = [];
+                this.answeredStatus = [];
+                this.score = 0;
+                this.incorrectQuestions = [];
+                this.isReviewMode = false;
+            }
+
+            displayQuestion(index, isReview = false) {
+                this.isReviewMode = isReview;
+                const questionData = this.currentQuizData[index];
+                this.quizArea.innerHTML = '';
+
+                const questionBlock = this.createQuestionBlock(questionData, index, isReview);
+                this.quizArea.appendChild(questionBlock);
+                
+                this.updateNavigationButtons();
+                if (!isReview) this.updateProgressBar();
+                
+                this.submitBtn.style.display = isReview ? 'none' : 'inline-flex';
+                if (!isReview) {
+                    this.submitBtn.disabled = this.answeredStatus[index] || this.userAnswers[index] === null;
+                }
+
+                this.quizContentArea.scrollTop = 0;
+            }
+
+            createQuestionBlock(questionData, index, isReview) {
+                const questionBlock = document.createElement('div');
+                questionBlock.classList.add('question-block');
+
+                const questionHeader = document.createElement('div');
+                questionHeader.classList.add('question-header');
+                
+                const sectionTitleDisplay = document.createElement('span');
+                sectionTitleDisplay.classList.add('section-title-display');
+                sectionTitleDisplay.textContent = questionData.section || "综合"; // Default section if not provided
+                questionHeader.appendChild(sectionTitleDisplay);
+
+                const questionNumberDisplay = document.createElement('span');
+                questionNumberDisplay.classList.add('question-number-display');
+                if (isReview) {
+                    questionNumberDisplay.textContent = `错题 ${this.currentIncorrectReviewIndex + 1} / ${this.incorrectQuestions.length}`;
+                } else {
+                    questionNumberDisplay.textContent = `题目 ${index + 1} / ${this.currentQuizData.length}`;
+                }
+                questionHeader.appendChild(questionNumberDisplay);
+                
+                questionBlock.appendChild(questionHeader);
+
+                const questionText = document.createElement('p');
+                questionText.classList.add('question-text');
+                questionText.innerHTML = questionData.question;
+                questionBlock.appendChild(questionText);
+
+                const optionsDiv = this.createOptionsDiv(questionData, index, isReview);
+                questionBlock.appendChild(optionsDiv);
+
+                if ((!isReview && this.answeredStatus[index]) || isReview) {
+                    const explanationDiv = this.createExplanationDiv(questionData, index, isReview);
+                    questionBlock.appendChild(explanationDiv);
+                    this.highlightAnsweredOptions(optionsDiv, index, questionData.correctAnswer);
+                }
+                
+                return questionBlock;
+            }
+
+            createOptionsDiv(questionData, index, isReview) {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.classList.add('options');
+                
+                questionData.options.forEach((option, i) => {
+                    const label = document.createElement('label');
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `question${index}`;
+                    radio.id = `q${index}_option${i}`;
+                    radio.value = i;
+                    
+                    label.htmlFor = radio.id;
+
+                    const customRadioSpan = document.createElement('span');
+                    customRadioSpan.classList.add('custom-radio');
+
+                    const optionTextSpan = document.createElement('span');
+                    optionTextSpan.classList.add('option-text');
+                    optionTextSpan.textContent = option;
+
+                    if (this.userAnswers[index] === i && !this.answeredStatus[index] && !isReview) {
+                        radio.checked = true;
+                        label.classList.add('selected-option');
+                    }
+                    
+                    radio.disabled = this.answeredStatus[index] || isReview;
+                    if (isReview || this.answeredStatus[index]) {
+                        label.classList.add('answered-option');
+                        if (isReview) label.classList.add('disabled-option');
+                    }
+                    
+                    radio.addEventListener('change', () => {
+                        if (!this.answeredStatus[index] && !isReview) {
+                            this.userAnswers[index] = i;
+                            optionsDiv.querySelectorAll('label').forEach(lbl => lbl.classList.remove('selected-option'));
+                            label.classList.add('selected-option');
+                            this.submitBtn.disabled = false;
+                        }
+                    });
+
+                    label.appendChild(radio);
+                    label.appendChild(customRadioSpan);
+                    label.appendChild(optionTextSpan);
+                    optionsDiv.appendChild(label);
+                });
+                
+                return optionsDiv;
+            }
+
+            createExplanationDiv(questionData, index, isReview) {
+                const explanationDiv = document.createElement('div');
+                explanationDiv.classList.add('explanation');
+                
+                let explanationHTML = `<strong>解析：</strong> ${questionData.explanation || "暂无解析。"}`; // Default explanation
+                
+                if (this.userAnswers[index] === questionData.correctAnswer) {
+                    explanationDiv.classList.add('correct');
+                    if (!isReview) explanationHTML += "<span class='user-answer-indicator'><br><strong>您的选择：</strong> 正确！</span>";
+                    else explanationHTML += `<span class='user-answer-indicator'><br><strong>您的选择：</strong> ${questionData.options[this.userAnswers[index]]} (正确)</span>`;
+                } else {
+                    explanationDiv.classList.add('incorrect');
+                    explanationHTML += `<span class='user-answer-indicator'><br><strong>您的选择：</strong> ${this.userAnswers[index] !== null ? questionData.options[this.userAnswers[index]] : '未选择'} (错误)</span>`;
+                    explanationHTML += `<span class='correct-answer-indicator'><br><strong>正确答案：</strong> ${questionData.options[questionData.correctAnswer]}</span>`;
+                }
+                
+                explanationDiv.innerHTML = explanationHTML;
+                return explanationDiv;
+            }
+
+            highlightAnsweredOptions(optionsDiv, qIndex, correctAnswerIndex) {
+                const radioLabels = optionsDiv.querySelectorAll('label');
+                radioLabels.forEach((label, i) => {
+                    const radioInput = label.querySelector('input[type="radio"]');
+                    radioInput.disabled = true;
+                    label.classList.remove('selected-option');
+                    label.classList.add('answered-option');
+
+                    if (i === correctAnswerIndex) {
+                        label.classList.add('correct-answer-highlight');
+                    }
+                    if (this.userAnswers[qIndex] === i && this.userAnswers[qIndex] !== correctAnswerIndex) {
+                        label.classList.add('incorrect-user-choice');
+                    }
+                });
+            }
+
+            handlePrevious() {
+                if (this.isReviewMode) {
+                    if (this.currentIncorrectReviewIndex > 0) {
+                        this.currentIncorrectReviewIndex--;
+                        this.displayQuestion(this.incorrectQuestions[this.currentIncorrectReviewIndex], true);
+                    }
+                } else {
+                    if (this.currentQuestionIndex > 0) {
+                        this.currentQuestionIndex--;
+                        this.displayQuestion(this.currentQuestionIndex);
+                    }
+                }
+            }
+
+            handleNext() {
+                if (this.isReviewMode) {
+                    if (this.nextBtn.textContent.includes('完成回顾')) {
+                        this.endReview();
+                    } else if (this.currentIncorrectReviewIndex < this.incorrectQuestions.length - 1) {
+                        this.currentIncorrectReviewIndex++;
+                        this.displayQuestion(this.incorrectQuestions[this.currentIncorrectReviewIndex], true);
+                    }
+                } else {
+                    if (this.nextBtn.textContent.includes('查看结果')) {
+                        this.showFinalScore();
+                    } else if (this.currentQuestionIndex < this.currentQuizData.length - 1) {
+                        this.currentQuestionIndex++;
+                        this.displayQuestion(this.currentQuestionIndex);
+                    }
+                }
+            }
+
+            handleSubmit() {
+                if (this.userAnswers[this.currentQuestionIndex] === null && !this.answeredStatus[this.currentQuestionIndex]) {
+                    alert('请选择一个答案后再提交！');
+                    return;
+                }
+                if (this.answeredStatus[this.currentQuestionIndex]) return;
+
+                this.answeredStatus[this.currentQuestionIndex] = true;
+                if (this.userAnswers[this.currentQuestionIndex] === this.currentQuizData[this.currentQuestionIndex].correctAnswer) {
+                    this.score++;
+                } else {
+                    this.incorrectQuestions.push(this.currentQuestionIndex);
+                }
+                this.displayQuestion(this.currentQuestionIndex); // Re-display to show explanation
+                this.updateProgressBar();
+                this.updateNavigationButtons();
+            }
+
+            updateNavigationButtons() {
+                this.prevBtn.innerHTML = this.isReviewMode ? '← 上一错题' : '← 上一题';
+                this.submitBtn.innerHTML = '提交答案 ✓';
+
+                if (this.isReviewMode) {
+                    this.prevBtn.disabled = this.currentIncorrectReviewIndex === 0;
+                    this.nextBtn.disabled = false;
+                    this.nextBtn.innerHTML = (this.currentIncorrectReviewIndex === this.incorrectQuestions.length - 1) ? '完成回顾 🏁' : '下一错题 →';
+                } else {
+                    this.prevBtn.disabled = this.currentQuestionIndex === 0;
+                    if (this.currentQuestionIndex === this.currentQuizData.length - 1) { // Last question
+                        if (this.allQuestionsAnswered()) {
+                            this.nextBtn.innerHTML = '查看结果 🏁';
+                            this.nextBtn.disabled = false;
+                            this.submitBtn.style.display = 'none'; // Hide submit when all answered
+                        } else {
+                            this.nextBtn.innerHTML = '下一题 →';
+                            this.nextBtn.disabled = true; // Disable next if last q and not all answered
+                            this.submitBtn.style.display = this.answeredStatus[this.currentQuestionIndex] ? 'none' : 'inline-flex';
+                        }
+                    } else { // Not the last question
+                        this.nextBtn.innerHTML = '下一题 →';
+                        this.nextBtn.disabled = false; // Enable next for non-last questions
+                        this.submitBtn.style.display = this.answeredStatus[this.currentQuestionIndex] ? 'none' : 'inline-flex';
+                    }
+                    this.submitBtn.disabled = this.answeredStatus[this.currentQuestionIndex] || this.userAnswers[this.currentQuestionIndex] === null;
+                }
+            }
+
+            allQuestionsAnswered() {
+                return this.answeredStatus.every(status => status === true);
+            }
+
+            updateProgressBar() {
+                const answeredCount = this.answeredStatus.filter(status => status === true).length;
+                const progress = this.currentQuizData.length > 0 ? (answeredCount / this.currentQuizData.length) * 100 : 0;
+                this.progressBar.style.width = `${progress}%`;
+                this.progressBar.textContent = `${Math.round(progress)}%`;
+            }
+
+            showFinalScore() {
+                this.quizEndTime = new Date();
+                const timeTaken = this.quizEndTime - this.quizStartTime;
+                const accuracy = this.currentQuizData.length > 0 ? (this.score / this.currentQuizData.length) * 100 : 0;
+
+                this.quizContentArea.style.display = 'none';
+                this.navigationControls.style.display = 'none';
+                this.progressBarContainer.style.display = 'none';
+                
+                this.finalScoreContainer.style.display = 'flex';
+                this.finalScoreSummaryDiv.innerHTML = `
+                    <h3>测试完成！</h3>
+                    <p><span>总题目数：</span> <span>${this.currentQuizData.length}</span></p>
+                    <p><span>答对题数：</span> <span>${this.score}</span></p>
+                    <p><span>答错题数：</span> <span>${this.incorrectQuestions.length}</span></p>
+                    <p class="accuracy"><span>正确率：</span> <span>${accuracy.toFixed(1)}%</span></p>
+                    <p><span>总用时：</span> <span>${this.formatTime(timeTaken)}</span></p>
+                `;
+                this.reviewIncorrectBtn.style.display = this.incorrectQuestions.length > 0 ? 'inline-flex' : 'none';
+            }
+
+            startReviewIncorrect() {
+                if (this.incorrectQuestions.length === 0) return;
+                this.isReviewMode = true;
+                this.currentIncorrectReviewIndex = 0;
+
+                this.quizContentArea.style.display = 'block';
+                this.navigationControls.style.display = 'block';
+                this.finalScoreContainer.style.display = 'none';
+                this.progressBarContainer.style.display = 'none'; // Hide progress bar in review mode
+                this.submitBtn.style.display = 'none'; // Hide submit button in review mode
+
+                this.displayQuestion(this.incorrectQuestions[this.currentIncorrectReviewIndex], true);
+            }
+
+            endReview() {
+                this.isReviewMode = false;
+                this.showFinalScore(); // Go back to score screen
+                // this.submitBtn.style.display = 'inline-flex'; // Not needed if going to score screen
+            }
+
+            restart() {
+                // Re-initialize for a new attempt on the same quiz
+                this.currentQuestionIndex = 0;
+                this.userAnswers.fill(null);
+                this.answeredStatus.fill(false);
+                this.score = 0;
+                this.incorrectQuestions = [];
+                this.isReviewMode = false;
+                this.quizStartTime = new Date();
+                
+                this.quizContentArea.style.display = 'block';
+                this.navigationControls.style.display = 'block';
+                this.progressBarContainer.style.display = 'block';
+                this.finalScoreContainer.style.display = 'none';
+                
+                this.submitBtn.style.display = 'inline-flex'; // Show submit button
+                this.displayQuestion(this.currentQuestionIndex);
+            }
+
+            formatTime(milliseconds) {
+                if (milliseconds < 0) milliseconds = 0;
+                let totalSeconds = Math.floor(milliseconds / 1000);
+                let minutes = Math.floor(totalSeconds / 60);
+                let seconds = totalSeconds % 60;
+                return `${minutes}分 ${seconds.toString().padStart(2, '0')}秒`;
+            }
+        }
+
+        const quizEngine = new QuizEngine();
+    </script>
+    
+    <script>
+        // ===== ADMIN MANAGER =====
+        class AdminManager {
+            constructor() {
+                this.initElements();
+                this.setupEventListeners();
+            }
+
+            initElements() {
+                this.adminToggle = document.getElementById('adminToggle');
+                this.adminPanel = document.getElementById('adminPanel');
+                this.addQuizForm = document.getElementById('addQuizForm');
+                this.subjectSelect = document.getElementById('subjectSelect');
+                this.periodSelect = document.getElementById('periodSelect');
+                this.customPeriodInput = document.getElementById('customPeriodInput');
+                this.quizNameInput = document.getElementById('quizNameInput');
+                this.quizDescInput = document.getElementById('quizDescInput');
+                this.difficultySelect = document.getElementById('difficultySelect');
+                this.estimatedTimeInput = document.getElementById('estimatedTimeInput');
+                this.quizDataInput = document.getElementById('quizDataInput');
+                this.copyInstructionBtn = document.getElementById('copyInstructionBtn');
+                this.backupDataBtn = document.getElementById('backupDataBtn');
+                this.restoreDataBtn = document.getElementById('restoreDataBtn');
+                this.restoreFileInput = document.getElementById('restoreFileInput');
+                this.quizListContent = document.getElementById('quizListContent');
+            }
+
+            setupEventListeners() {
+                this.adminToggle.addEventListener('click', () => this.togglePanel());
+
+                document.addEventListener('click', (e) => {
+                    if (this.adminPanel && !this.adminPanel.contains(e.target) && e.target !== this.adminToggle) {
+                        this.adminPanel.classList.remove('active');
+                    }
+                });
+
+                this.subjectSelect.addEventListener('change', () => this.updatePeriodOptions());
+
+                this.addQuizForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addNewQuiz();
+                });
+
+                this.copyInstructionBtn.addEventListener('click', () => this.copyInstructionTemplate());
+
+                this.backupDataBtn.addEventListener('click', () => this.backupData());
+                this.restoreDataBtn.addEventListener('click', () => this.restoreFileInput.click());
+                this.restoreFileInput.addEventListener('change', (e) => this.restoreData(e));
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.adminPanel && this.adminPanel.classList.contains('active')) {
+                        this.adminPanel.classList.remove('active');
+                    }
+                });
+            }
+
+            togglePanel() {
+                this.adminPanel.classList.toggle('active');
+                if (this.adminPanel.classList.contains('active')) {
+                    this.updateQuizList();
+                    this.updatePeriodOptions(); // Update period options when panel opens, in case subject changed
+                }
+            }
+
+            updatePeriodOptions() {
+                const subjectId = this.subjectSelect.value;
+                this.periodSelect.innerHTML = '<option value="">请选择分类</option>';
+                
+                if (subjectId) {
+                    const options = DataManager.getPeriodOptions(subjectId);
+                    options.forEach(option => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option.id;
+                        optionElement.textContent = option.name;
+                        optionElement.setAttribute('data-description', option.description);
+                        this.periodSelect.appendChild(optionElement);
+                    });
+                    
+                    const customOption = document.createElement('option');
+                    customOption.value = 'custom';
+                    customOption.textContent = '自定义分类...';
+                    this.periodSelect.appendChild(customOption);
+                }
+                
+                this.customPeriodInput.style.display = 'none';
+                this.customPeriodInput.required = false; // Ensure it's not required by default
+                
+                this.periodSelect.onchange = () => {
+                    if (this.periodSelect.value === 'custom') {
+                        this.customPeriodInput.style.display = 'block';
+                        this.customPeriodInput.required = true;
+                        this.customPeriodInput.focus();
+                    } else {
+                        this.customPeriodInput.style.display = 'none';
+                        this.customPeriodInput.required = false;
+                        this.customPeriodInput.value = '';
+                    }
+                };
+                 // Trigger onchange if a period is already selected (e.g., during edit)
+                if (this.periodSelect.value === 'custom') {
+                    this.customPeriodInput.style.display = 'block';
+                    this.customPeriodInput.required = true;
+                }
+            }
+
+            addNewQuiz() {
+                const subjectId = this.subjectSelect.value;
+                let periodId = this.periodSelect.value; // Use let as it might be reassigned
+                const customPeriodName = this.customPeriodInput.value.trim();
+                const quizName = this.quizNameInput.value.trim();
+                const quizDesc = this.quizDescInput.value.trim();
+                const difficulty = this.difficultySelect.value;
+                const estimatedTime = this.estimatedTimeInput.value.trim();
+                const questionsDataText = this.quizDataInput.value.trim();
+
+                if (!subjectId) { alert('请选择学科！'); return; }
+                if (periodId === 'custom' && !customPeriodName) { alert('请输入自定义分类名称！'); return; }
+                if (!periodId && !customPeriodName) { alert('请选择或输入时期分类！'); return; }
+                if (!quizName) { alert('请输入题库名称！'); return; }
+                if (!questionsDataText) { alert('请输入题目数据！'); return; }
+
+
+                let questions;
+                try {
+                    questions = JSON.parse(questionsDataText);
+                    if (!Array.isArray(questions) || questions.length === 0) {
+                        throw new Error('题目数据必须是非空数组');
+                    }
+                    // Basic validation for each question
+                    for(const q of questions) {
+                        if (!q.question || !Array.isArray(q.options) || q.options.length === 0 || typeof q.correctAnswer !== 'number' || !q.explanation) {
+                            throw new Error('题目数据结构不完整 (缺少 question, options, correctAnswer, 或 explanation)');
+                        }
+                        if (q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
+                             throw new Error(`题 "${q.question.substring(0,20)}..." 的 correctAnswer 超出选项范围。`);
+                        }
+                    }
+                } catch (error) {
+                    alert('题目数据格式错误或内容不完整，请检查JSON格式及必填字段！\n错误：' + error.message);
+                    return;
+                }
+
+                let finalPeriodId, finalPeriodName, finalPeriodDescription;
+                
+                if (periodId === 'custom' || !periodId) { // Handles both 'custom' and if periodSelect is empty
+                    finalPeriodName = customPeriodName;
+                    finalPeriodId = finalPeriodName.toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яА-ЯёЁ]/g, '') || `custom_${Date.now()}`; // Added Russian chars and fallback
+                    finalPeriodDescription = `${finalPeriodName}相关的知识与题库`;
+                } else {
+                    const periodOptionsList = DataManager.getPeriodOptions(subjectId); // Renamed to avoid conflict
+                    const selectedPeriod = periodOptionsList.find(p => p.id === periodId);
+                    if (selectedPeriod) {
+                        finalPeriodId = selectedPeriod.id;
+                        finalPeriodName = selectedPeriod.name;
+                        finalPeriodDescription = selectedPeriod.description;
+                    } else {
+                        // This case should ideally not happen if periodSelect is populated correctly
+                        // but as a fallback, treat as custom if selectedPeriod is not found
+                        console.warn(`Selected period ID "${periodId}" not found in options. Treating as custom.`);
+                        finalPeriodName = periodId; // Or some other fallback
+                        finalPeriodId = periodId.toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яА-ЯёЁ]/g, '');
+                        finalPeriodDescription = `${finalPeriodName}相关的知识与题库`;
+                        // alert('所选时期分类不存在！'); return;
+                    }
+                }
+
+                const quizId = quizName.toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яА-ЯёЁ]/g, '') + '_' + Date.now();
+
+                try {
+                    const periodPayload = { // Renamed from periodData
+                        id: finalPeriodId,
+                        name: finalPeriodName,
+                        description: finalPeriodDescription
+                    };
+
+                    const newQuiz = {
+                        id: quizId,
+                        name: quizName,
+                        description: quizDesc || `${quizName}的详细内容`,
+                        difficulty: difficulty,
+                        estimatedTime: estimatedTime || "未知", // Default estimated time
+                        questions: questions
+                    };
+
+                    DataManager.addQuiz(subjectId, periodPayload, newQuiz);
+
+                    this.addQuizForm.reset();
+                    this.quizDataInput.value = '';
+                    this.subjectSelect.value = ""; // Reset subject select
+                    this.periodSelect.innerHTML = '<option value="">请先选择学科</option>';
+                    this.customPeriodInput.style.display = 'none';
+                    this.customPeriodInput.value = '';
+                    this.customPeriodInput.required = false;
+
+
+                    this.updateQuizList();
+                    
+                    if (window.uiManager) {
+                        window.uiManager.refreshCurrentPage();
+                    }
+
+                    alert('题库添加成功！');
+
+                } catch (error) {
+                    console.error("Error adding quiz:", error);
+                    alert('添加题库失败：' + error.message);
+                }
+            }
+
+            deleteQuiz(subjectId, periodId, quizId) {
+                if (!confirm('确定要删除这个题库吗？此操作不可恢复。')) return;
+
+                if (DataManager.deleteQuiz(subjectId, periodId, quizId)) {
+                    this.updateQuizList();
+                    if (window.uiManager) {
+                        window.uiManager.refreshCurrentPage();
+                    }
+                    alert('题库已删除。');
+                } else {
+                    alert('删除失败，题库可能不存在。');
+                }
+            }
+
+            editQuiz(subjectId, periodId, quizId) {
+                const quiz = DataManager.getQuiz(subjectId, periodId, quizId);
+                if (!quiz) {
+                    alert('无法编辑：未找到题库。');
+                    return;
+                }
+
+                const allQuizData = DataManager.getData(); // Renamed from quizData
+                const period = allQuizData[subjectId]?.periods[periodId];
+
+                if (!period) {
+                     alert('无法编辑：未找到时期分类。');
+                     return;
+                }
+
+                this.subjectSelect.value = subjectId;
+                this.updatePeriodOptions(); // This will repopulate periodSelect
+                
+                // Use setTimeout to allow periodSelect to repopulate before setting its value
+                setTimeout(() => {
+                    // Attempt to find the periodId in the newly populated options
+                    const periodOptionExists = Array.from(this.periodSelect.options).some(option => option.value === periodId);
+
+                    if (periodOptionExists) {
+                        this.periodSelect.value = periodId;
+                        this.customPeriodInput.style.display = 'none';
+                        this.customPeriodInput.required = false;
+                        this.customPeriodInput.value = '';
+                    } else {
+                        // If periodId is not a standard option, it must be custom
+                        this.periodSelect.value = 'custom';
+                        this.customPeriodInput.style.display = 'block';
+                        this.customPeriodInput.value = period.name; // Populate with the period's name
+                        this.customPeriodInput.required = true;
+                    }
+                    
+                    this.quizNameInput.value = quiz.name;
+                    this.quizDescInput.value = quiz.description || '';
+                    this.difficultySelect.value = quiz.difficulty;
+                    this.estimatedTimeInput.value = quiz.estimatedTime || '';
+                    this.quizDataInput.value = JSON.stringify(quiz.questions, null, 2);
+                }, 100); // 100ms delay, adjust if needed
+
+                // It's better to update the quiz rather than delete and re-add immediately.
+                // For simplicity of this example, we'll delete it first.
+                // A more robust approach would be to have an "Update Quiz" button
+                // that calls a DataManager.updateQuiz method.
+                if (confirm('将填充表单以编辑此题库。编辑完成后，您需要重新提交以保存更改。\n注意：为简化操作，原题库将先被删除。请确认是否继续？')) {
+                    DataManager.deleteQuiz(subjectId, periodId, quizId); // Delete the old one
+                    this.updateQuizList(); // Update list to reflect deletion
+                    if (window.uiManager) {
+                        window.uiManager.refreshCurrentPage();
+                    }
+                    this.adminPanel.classList.add('active'); // Ensure panel is open
+                    this.quizNameInput.focus(); // Focus on a field
+                } else {
+                    // If user cancels, revert any premature changes or do nothing
+                    this.subjectSelect.value = ""; // Reset form if edit is cancelled
+                    this.periodSelect.innerHTML = '<option value="">请先选择学科</option>';
+                    this.addQuizForm.reset();
+                    this.quizDataInput.value = "";
+                }
+            }
+
+            updateQuizList() {
+                const allQuizData = DataManager.getData(); // Renamed
+                let listHTML = '';
+                let quizCount = 0;
+                
+                Object.values(allQuizData).forEach(subject => {
+                    if (subject && subject.periods && typeof subject.periods === 'object') {
+                        Object.values(subject.periods).forEach(period => {
+                            if (period && period.quizzes && Array.isArray(period.quizzes)) {
+                                period.quizzes.forEach(quiz => {
+                                    quizCount++;
+                                    listHTML += `
+                                        <div class="quiz-item">
+                                            <div>
+                                                <strong>${quiz.name}</strong><br>
+                                                <small>${subject.name} - ${period.name} (${quiz.questions?.length || 0}题)</small>
+                                            </div>
+                                            <div>
+                                                <button class="edit-btn" onclick="adminManager.editQuiz('${subject.id}', '${period.id}', '${quiz.id}')">
+                                                    编辑
+                                                </button>
+                                                <button class="delete-btn" onclick="adminManager.deleteQuiz('${subject.id}', '${period.id}', '${quiz.id}')">
+                                                    删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                            }
+                        });
+                    }
+                });
+                this.quizListContent.innerHTML = quizCount > 0 ? listHTML : '<p style="text-align:center;color:var(--text-muted);">暂无题库</p>';
+            }
+
+            copyInstructionTemplate() {
+                const instruction = `📝 题目生成任务指令
+
+请根据我提供的学习资料，生成选择题题库，格式必须严格按照以下JSON模板：
+
+\`\`\`json
+[
+  {
+    "section": "章节或主题名称 (例如：印象派的起源)",
+    "question": "题目内容 (例如：印象派运动始于哪个国家？)",
+    "options": [
+      "选项A的完整内容 (例如：法国)",
+      "选项B的完整内容 (例如：意大利)", 
+      "选项C的完整内容 (例如：西班牙)",
+      "选项D的完整内容 (例如：英国)"
+    ],
+    "correctAnswer": 0,
+    "explanation": "详细的解析，说明为什么这个答案是正确的 (例如：印象派是19世纪下半叶在法国兴起的一场重要的艺术运动...)"
+  }
+  // ...更多题目对象
+]
+\`\`\`
+
+📋 格式要求：
+1. **顶级是JSON数组**: \`[\` 开头, \`]\` 结尾。
+2. **每个题目是一个JSON对象**: \`{\` ... \`}\`。
+3. **section字段 (字符串)**: 题目所属的章节、主题或知识点分类。务必具体明确。
+4. **question字段 (字符串)**: 题目的完整描述。必须清晰、准确，避免歧义。
+5. **options数组 (字符串数组)**: 必须包含4个字符串选项。内容要完整，不要只写"选项A"。
+6. **correctAnswer字段 (数字)**: 正确答案在options数组中的索引。0代表第一个选项，1代表第二个，以此类推 (0, 1, 2, 或 3)。
+7. **explanation字段 (字符串)**: 对正确答案的详细解析。要解释清楚原理、背景知识点，帮助学习者理解。
+
+🎯 题目质量要求：
+- **相关性**: 题目必须与提供的学习资料紧密相关。
+- **准确性**: 题目、选项和答案必须准确无误。
+- **清晰度**: 问题和选项的表述应清晰易懂。
+- **干扰性**: 错误选项应具有合理的迷惑性，避免答案过于明显或无关。
+- **覆盖面**: 尽可能全面地覆盖学习资料中的重要知识点。
+- **解析质量**: 解析应具有教育意义，不仅仅是重复答案。
+- **数量**: 根据资料内容，建议生成10-30道题目为宜。
+
+🌟 适用范围：
+- 艺术史类：西方艺术史、中国美术史、艺术概论
+- 世界常识类：文史哲、法政、理科、工科、农业、医学、文化艺术等各领域基础知识
+
+请严格按照以上格式和要求，根据我接下来提供的学习资料生成高质量的题库JSON数据。
+
+---
+
+我的学习资料：
+[请在此处粘贴您的学习资料]`;
+
+                navigator.clipboard.writeText(instruction).then(() => {
+                    const originalText = this.copyInstructionBtn.textContent;
+                    this.copyInstructionBtn.textContent = '✅ 已复制！';
+                    this.copyInstructionBtn.style.background = '#48bb78'; // Green for success
+                    setTimeout(() => {
+                        this.copyInstructionBtn.textContent = originalText;
+                        this.copyInstructionBtn.style.background = '#3182ce'; // Original blue
+                    }, 2000);
+                }).catch(err => {
+                    console.error('无法自动复制: ', err);
+                    alert('自动复制失败，请手动复制以下指令：\n\n' + instruction);
+                });
+            }
+
+            backupData() {
+                try {
+                    const backupData = DataManager.getBackupData();
+                    
+                    const now = new Date();
+                    const timestamp = now.toISOString().slice(0, 19).replace(/[T:]/g, '_'); // YYYY-MM-DD_HH_MM_SS
+                    const filename = `学习助手题库备份_${timestamp}.json`;
+
+                    const dataStr = JSON.stringify(backupData, null, 2); // Pretty print JSON
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    downloadLink.style.display = 'none'; // Hidden link
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click(); // Trigger download
+                    document.body.removeChild(downloadLink); // Clean up
+
+                    setTimeout(() => URL.revokeObjectURL(url), 100); // Release object URL
+
+                    const originalText = this.backupDataBtn.textContent;
+                    this.backupDataBtn.textContent = '✅ 备份成功！';
+                    this.backupDataBtn.style.background = '#48bb78';
+                    setTimeout(() => {
+                        this.backupDataBtn.textContent = originalText;
+                        this.backupDataBtn.style.background = '#805ad5'; // Original purple
+                    }, 2000);
+                    console.log('数据备份成功:', filename);
+                } catch (error) {
+                    console.error('备份失败:', error);
+                    alert('数据备份失败，请重试！\n错误：' + error.message);
+                }
+            }
+
+            restoreData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.name.toLowerCase().endsWith('.json')) {
+                    alert('请选择JSON格式的备份文件！');
+                    this.restoreFileInput.value = ''; // Reset file input
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        
+                        let dataToRestore;
+                        // Check for our backup structure or a raw data structure
+                        if (jsonData && jsonData.data && jsonData.version) { // Our backup structure
+                            dataToRestore = jsonData.data;
+                        } else if (jsonData && (jsonData.western_art || jsonData.world_knowledge)) { // Raw data structure
+                            dataToRestore = jsonData;
+                        } else {
+                            throw new Error('文件格式不正确，无法识别为有效的题库数据或备份文件。');
+                        }
+
+                        // Validate the data structure before attempting to restore
+                        if (!DataManager.validateQuizData(dataToRestore)) {
+                            throw new Error('备份文件中的数据结构验证失败，无法恢复。请确保文件内容符合预期的题库格式。');
+                        }
+                        
+                        const currentQuizData = DataManager.getData(); // Renamed
+                        const statsBefore = DataManager.getDataStatistics(currentQuizData);
+                        const hasExistingData = statsBefore.quizzes > 0;
+
+                        let shouldProceed = true;
+                        if (hasExistingData) {
+                            shouldProceed = confirm(
+                                '检测到现有题库数据。\n\n选择"确定"将用备份文件中的数据【完全替换】现有所有数据。\n选择"取消"将中止恢复操作。\n\n强烈建议在执行此操作前先备份当前数据！'
+                            );
+                        }
+
+                        if (!shouldProceed) {
+                            this.restoreFileInput.value = '';
+                            return;
+                        }
+
+                        DataManager.restoreData(dataToRestore); // This now directly assigns and saves
+
+                        this.updateQuizList();
+                        if (window.uiManager) {
+                            window.uiManager.init(); // Re-initialize UI to reflect new data from home
+                        }
+
+                        const originalText = this.restoreDataBtn.textContent;
+                        this.restoreDataBtn.textContent = '✅ 恢复成功！';
+                        this.restoreDataBtn.style.background = '#48bb78';
+                        setTimeout(() => {
+                            this.restoreDataBtn.textContent = originalText;
+                            this.restoreDataBtn.style.background = '#38a169'; // Original green
+                        }, 2000);
+
+                        const statsAfter = DataManager.getDataStatistics();
+                        alert(`数据恢复成功！\n\n📊 恢复统计：\n• 学科数量：${statsAfter.subjects}\n• 分类数量：${statsAfter.periods}\n• 题库数量：${statsAfter.quizzes}\n• 题目总数：${statsAfter.questions}`);
+                        console.log('数据恢复成功:', statsAfter);
+
+                    } catch (error) {
+                        console.error('数据恢复失败:', error);
+                        alert('数据恢复失败！\n\n可能的原因：\n• 文件不是有效的JSON格式。\n• 文件内容不符合题库数据结构。\n• 文件已损坏。\n\n错误详情：' + error.message);
+                    }
+                    this.restoreFileInput.value = ''; // Reset file input in all cases
+                };
+
+                reader.onerror = () => {
+                    alert('文件读取失败，请重试！');
+                    this.restoreFileInput.value = '';
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        const adminManager = new AdminManager();
+    </script>
+    
+    <script>
+        // ===== UI MANAGER =====
+        class UIManager {
+            constructor() {
+                this.currentState = {
+                    level: 'home',
+                    subject: null,
+                    period: null,
+                    quiz: null
+                };
+                
+                this.initElements();
+                this.setupEventListeners();
+            }
+
+            initElements() {
+                this.breadcrumb = document.getElementById('breadcrumb');
+                this.cardsGrid = document.getElementById('cardsGrid');
+            }
+
+            setupEventListeners() {
+                this.breadcrumb.addEventListener('click', (e) => {
+                    const item = e.target.closest('.breadcrumb-item');
+                    if (!item || item.classList.contains('current')) return;
+                    
+                    const level = item.dataset.level;
+                    this.navigateToLevel(level, item.dataset);
+                });
+            }
+
+            navigateToLevel(level, data = {}) {
+                switch (level) {
+                    case 'home':
+                        this.currentState = { level: 'home', subject: null, period: null, quiz: null };
+                        this.showHomePage();
+                        break;
+                    case 'subject':
+                        this.currentState = { level: 'subject', subject: data.subject, period: null, quiz: null };
+                        this.showSubjectPage(data.subject);
+                        break;
+                    case 'period':
+                        this.currentState = { level: 'period', subject: data.subject, period: data.period, quiz: null };
+                        this.showPeriodPage(data.subject, data.period);
+                        break;
+                }
+                this.updateBreadcrumb();
+            }
+
+            showHomePage() {
+                const allQuizData = DataManager.getData(); // Renamed
+                const subjects = Object.values(allQuizData).filter(subject => 
+                    subject && subject.periods && Object.keys(subject.periods).length > 0
+                );
+                
+                this.cardsGrid.innerHTML = subjects.map(subject => {
+                    const totalQuizzes = Object.values(subject.periods).reduce((sum, period) => sum + (period.quizzes ? period.quizzes.length : 0), 0);
+                    return `
+                        <div class="card" onclick="uiManager.navigateToSubject('${subject.id}')">
+                            <div class="card-icon">${subject.icon || '📚'}</div>
+                            <h3>${subject.name}</h3>
+                            <p>${subject.description}</p>
+                            <div class="card-meta">
+                                <span>${Object.keys(subject.periods).length} 个分类</span>
+                                <span>${totalQuizzes} 个题库</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('') || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;"><h3>暂无题库</h3><p>点击右上角⚙️按钮添加您的第一个题库吧！</p></div>';
+            }
+
+            showSubjectPage(subjectId) {
+                const allQuizData = DataManager.getData(); // Renamed
+                const subject = allQuizData[subjectId];
+                if (!subject) {
+                    console.error(`Subject with ID "${subjectId}" not found.`);
+                    this.navigateToLevel('home');
+                    return;
+                }
+
+                const periods = subject.periods ? Object.values(subject.periods) : [];
+                
+                this.cardsGrid.innerHTML = periods.map(period => `
+                    <div class="card" onclick="uiManager.navigateToPeriod('${subjectId}', '${period.id}')">
+                        <div class="card-icon">${period.icon || '📂'}</div>
+                        <h3>${period.name}</h3>
+                        <p>${period.description}</p>
+                        <div class="card-meta">
+                            <span>${period.quizzes?.length || 0} 个题库</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                `).join('') || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;"><h3>该学科下暂无分类或题库</h3><p>点击右上角⚙️按钮添加题库！</p></div>';
+            }
+
+            showPeriodPage(subjectId, periodId) {
+                const allQuizData = DataManager.getData(); // Renamed
+                const period = allQuizData[subjectId]?.periods[periodId];
+                if (!period) {
+                    console.error(`Period with ID "${periodId}" in subject "${subjectId}" not found.`);
+                    this.navigateToLevel('subject', { subject: subjectId });
+                    return;
+                }
+
+                const quizzes = period.quizzes || [];
+                this.cardsGrid.innerHTML = quizzes.map(quiz => `
+                    <div class="card">
+                        <div class.card-icon">${this.getDifficultyIcon(quiz.difficulty)}</div>
+                        <h3>${quiz.name}</h3>
+                        <p>${quiz.description}</p>
+                        <div class="card-meta">
+                            <span class="difficulty-badge difficulty-${quiz.difficulty || 'unknown'}">
+                                ${this.getDifficultyText(quiz.difficulty)}
+                            </span>
+                            <span>${quiz.questions?.length || 0} 题</span>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                                预计用时: ${quiz.estimatedTime || "未知"}
+                            </div>
+                            <button class="start-quiz-btn" onclick="uiManager.startQuiz('${subjectId}', '${periodId}', '${quiz.id}')">
+                                <span>开始测试</span>
+                                <span>▶</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;"><h3>该分类下暂无题库</h3><p>点击右上角⚙️按钮添加题库！</p></div>';
+            }
+
+            updateBreadcrumb() {
+                let items = [
+                    { level: 'home', text: '🏠 首页', data: {} }
+                ];
+                const allQuizData = DataManager.getData(); // Renamed
+
+                if (this.currentState.subject) {
+                    const subject = allQuizData[this.currentState.subject];
+                    if (subject) {
+                        items.push({
+                            level: 'subject',
+                            text: `${subject.icon || '📚'} ${subject.name}`,
+                            data: { subject: this.currentState.subject }
+                        });
+                    }
+                }
+
+                if (this.currentState.period) {
+                    const period = allQuizData[this.currentState.subject]?.periods[this.currentState.period];
+                    if (period) {
+                        items.push({
+                            level: 'period',
+                            text: `${period.icon || '📂'} ${period.name}`,
+                            data: { subject: this.currentState.subject, period: this.currentState.period }
+                        });
+                    }
+                }
+
+                this.breadcrumb.innerHTML = items.map((item, index) => {
+                    const isLast = index === items.length - 1;
+                    const isCurrent = isLast;
+                    
+                    let dataAttrs = '';
+                    for (const key in item.data) {
+                        if (item.data.hasOwnProperty(key) && item.data[key] !== null && item.data[key] !== undefined) {
+                            dataAttrs += `data-${key}="${item.data[key]}" `;
+                        }
+                    }
+
+                    return `
+                        <div class="breadcrumb-item ${isCurrent ? 'current' : ''}" 
+                             data-level="${item.level}" 
+                             ${dataAttrs.trim()}>
+                            ${item.text}
+                        </div>
+                        ${!isLast ? '<span class="breadcrumb-separator">›</span>' : ''}
+                    `;
+                }).join('');
+            }
+
+            refreshCurrentPage() {
+                // const allQuizData = DataManager.getData(); // Renamed - not strictly needed here if methods handle it
+                
+                if (this.currentState.level === 'period' && this.currentState.subject && this.currentState.period) {
+                    // Check if data still exists before trying to show
+                    const periodExists = DataManager.getData()[this.currentState.subject]?.periods[this.currentState.period];
+                    if (periodExists) {
+                        this.showPeriodPage(this.currentState.subject, this.currentState.period);
+                    } else {
+                        this.navigateToLevel('subject', { subject: this.currentState.subject });
+                    }
+                } else if (this.currentState.level === 'subject' && this.currentState.subject) {
+                    const subjectExists = DataManager.getData()[this.currentState.subject];
+                    if (subjectExists) {
+                        this.showSubjectPage(this.currentState.subject);
+                    } else {
+                        this.navigateToLevel('home');
+                    }
+                } else if (this.currentState.level === 'home') {
+                    this.showHomePage();
+                }
+                this.updateBreadcrumb(); // Ensure breadcrumb is also updated
+            }
+
+            navigateToSubject(subjectId) {
+                this.navigateToLevel('subject', { subject: subjectId });
+            }
+
+            navigateToPeriod(subjectId, periodId) {
+                this.navigateToLevel('period', { subject: subjectId, period: periodId });
+            }
+
+            startQuiz(subjectId, periodId, quizId) {
+                quizEngine.start(subjectId, periodId, quizId);
+            }
+
+            getDifficultyIcon(difficulty) {
+                const icons = {
+                    easy: '🟢',
+                    medium: '🟡',
+                    hard: '🔴'
+                };
+                return icons[difficulty] || '⚪'; // Default for unknown
+            }
+
+            getDifficultyText(difficulty) {
+                const texts = {
+                    easy: '初级',
+                    medium: '中级',
+                    hard: '高级'
+                };
+                return texts[difficulty] || '未知'; // Default for unknown
+            }
+
+            init() {
+                this.navigateToLevel('home'); // Start from home, which will call showHomePage and updateBreadcrumb
+            }
+        }
+
+        const uiManager = new UIManager();
+        window.uiManager = uiManager; // Expose to global for HTML onclick
+        
+        // ===== APP INIT =====
+        function initApp() {
+            try {
+                // DataManager is already initialized via its IIFE
+                uiManager.init(); // Initialize UI, which depends on DataManager
+                // AdminManager is already initialized
+                // QuizEngine is already initialized
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (quizEngine.quizContainer && quizEngine.quizContainer.style.display !== 'none') {
+                            quizEngine.close();
+                        }
+                        if (adminManager.adminPanel && adminManager.adminPanel.classList.contains('active')) {
+                            adminManager.adminPanel.classList.remove('active');
+                        }
+                    }
+                });
+
+                window.addEventListener('beforeunload', (e) => {
+                    if (quizEngine.currentQuizData && quizEngine.currentQuestionIndex > 0 && !quizEngine.isReviewMode && quizEngine.finalScoreContainer.style.display === 'none') {
+                        e.preventDefault();
+                        e.returnValue = '您正在进行测试，确定要离开吗？您的进度将不会被保存。';
+                        return e.returnValue;
+                    }
+                });
+
+                console.log('学习助手应用初始化完成');
+                
+            } catch (error) {
+                console.error('应用初始化失败:', error);
+                // Simple alert for critical init errors, or use a more sophisticated error display
+                const errorDiv = document.createElement('div');
+                errorDiv.textContent = '应用初始化失败，请刷新页面重试。错误: ' + error.message;
+                errorDiv.style.cssText = "position:fixed;top:10px;left:10px;background:red;color:white;padding:10px;z-index:10000;";
+                document.body.prepend(errorDiv);
+            }
+        }
+
+        // Start the application
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp(); // DOMContentLoaded has already fired
+        }
+
+        // Global utility/debug functions
+        window.app = {
+            info: () => ({
+                name: '学习助手',
+                version: '2.1.0 (修复版)',
+                description: '艺术史与世界常识题库系统'
+            }),
+            restart: () => {
+                if (confirm('确定要重启应用吗？未保存的更改将丢失。')) {
+                    location.reload();
+                }
+            },
+            clearAllData: () => {
+                if (confirm('警告：确定要清除所有题库数据吗？此操作不可恢复！')) {
+                    localStorage.removeItem('artQuizData');
+                    alert('所有数据已清除。应用将刷新。');
+                    location.reload();
+                }
+            },
+            getStats: () => DataManager.getDataStatistics(),
+            exportData: () => {
+                const dataStr = JSON.stringify(DataManager.getData(), null, 2);
+                const dataBlob = new Blob([dataStr], {type : 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'quizData_export.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                console.log("数据已导出为 quizData_export.json");
+            }
+        };
+
+        // Log debug info in development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('🎯 学习助手应用 - 开发模式');
+            console.log('📊 应用信息:', window.app.info());
+            console.log('📈 当前数据统计:', window.app.getStats());
+            console.log('💡 可用命令:', Object.keys(window.app));
+        }
+    </script>
+</body>
+</html>
