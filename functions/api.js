@@ -19,7 +19,7 @@ export async function onRequest(context) {
         // 允许所有来源的请求。在生产环境中，你可能希望限制为你的网站域名。
         'Access-Control-Allow-Origin': '*', 
         // 允许的请求方法
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', // 最好也加上GET
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
         // 允许的请求头
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         // 预检请求结果的缓存时间（秒）
