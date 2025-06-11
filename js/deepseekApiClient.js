@@ -75,7 +75,7 @@ class DeepseekApiClient {
 
         try {
             console.log("[DeepseekClient] Sending stream request to PROXY:", this.baseUrl, "Model:", this.modelName);
-            const response = await fetch(this.baseUrl, {
+            const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ class DeepseekApiClient {
 
         try {
             console.log("[DeepseekClient] Sending non-stream request to PROXY:", this.baseUrl, "Model:", this.modelName);
-            const response = await fetch(this.baseUrl, {
+            const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
