@@ -14,7 +14,7 @@ window.AppConfig.APP_CONFIG = {
         model: 'deepseek-chat',
         // --- 修改开始 ---
         key: '', // 1. API密钥已从此移除！
-        baseUrl: '/api/proxy' // 2. API地址指向Vercel的代理函数
+        baseUrl: '/api' // ★★★ 修改这里！从 '/api/proxy' 改为 '/api' ★★★
         // --- 修改结束 ---
     },
 
