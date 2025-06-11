@@ -1,17 +1,21 @@
 // 文件: /api/proxy.js
 
-export const config = {
-    runtime: 'edge',
-  };
+/**
+ * Cloudflare Pages 函数，处理所有请求方法
+ * @param {object} context - 包含 request, env, 等信息的上下文对象
+ */
+export async function onRequest(context) {
+    // 从上下文中解构出 request 和 env
+    const { request, env } = context;
   
-  export default async function handler(request) {
-    // 只允许 POST 请求
+    // 只允许 POST 请求，其他方法返回 405
     if (request.method !== 'POST') {
       return new Response('Method Not Allowed', { status: 405 });
     }
   
-    // 从 Vercel 的环境变量中安全地读取 API 密钥
-    const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+    // 从环境变量中安全地读取 API 密钥
+    // env 对象包含了您在 Cloudflare UI 中设置的所有环境变量
+    const DEEPSEEK_API_KEY = env.DEEPSEEK_API_KEY;
   
     if (!DEEPSEEK_API_KEY) {
       return new Response('API key is not configured on the server.', { status: 500 });
@@ -34,6 +38,7 @@ export const config = {
       });
   
       // 将 DeepSeek 返回的流式或非流式响应直接传回给前端
+      // 注意：这里我们不能直接返回 response，需要创建一个新的 Response 对象来传递流
       return new Response(response.body, {
         status: response.status,
         headers: {
