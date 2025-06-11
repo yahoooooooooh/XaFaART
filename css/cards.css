@@ -1,0 +1,232 @@
+/* css/cards.css */
+
+/* Cards Grid */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--border-radius);
+    padding: 32px 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Ensure text color is set for cards */
+    color: var(--text-primary);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* --- NEW STYLES START --- */
+.card-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+}
+
+.card-delete-btn {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--border-color-light);
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(2px);
+    opacity: 0.7; /* Make it subtle by default */
+}
+
+.card:hover .card-delete-btn {
+    opacity: 1; /* Fully visible on card hover */
+}
+
+.card-delete-btn:hover {
+    background: var(--error-color);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+}
+/* --- NEW STYLES END --- */
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.difficulty-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.difficulty-easy { background: rgba(72, 187, 120, 0.15); color: #38a169; }
+.difficulty-medium { background: rgba(237, 137, 54, 0.15); color: #dd6b20; }
+.difficulty-hard { background: rgba(245, 101, 101, 0.15); color: #e53e3e; }
+
+/* Start Quiz Button */
+.start-quiz-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    width: 100%;
+    justify-content: center;
+    font-family: inherit; /* Ensure font consistency */
+}
+
+.start-quiz-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+}
+
+#openAiDiagnosticButton { /* Specific style for AI Diagnostic button */
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%) !important;
+    color: white;
+    border: none;
+}
+
+#openAiDiagnosticButton:hover {
+    filter: brightness(0.92);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Empty state message styling (used in UIManager) */
+.show-empty-state { /* This class is added by UIManager for its empty state */
+    /* .cards-grid will make it occupy full column width */
+    grid-column: 1 / -1; /* Ensure it spans all columns in cards-grid */
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 20px;
+    background: rgba(255,255,255,0.8);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+.show-empty-state h3 { /* Style for h3 within empty state */
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+.show-empty-state p { /* Style for p within empty state */
+    font-size: 1rem;
+}
+
+/* Responsive adjustments for cards */
+@media (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+        gap: 20px;
+    }
+    .card {
+        padding: 25px 20px;
+    }
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.6rem;
+        margin-bottom: 18px;
+    }
+    .card h3 {
+        font-size: 1.4rem;
+    }
+    .start-quiz-btn {
+        padding: 14px 28px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 20px 18px;
+    }
+    .card-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+    }
+    .card h3 {
+        font-size: 1.3rem;
+    }
+    .start-quiz-btn {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+    }
+}

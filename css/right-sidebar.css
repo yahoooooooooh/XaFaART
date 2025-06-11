@@ -1,0 +1,378 @@
+/* css/right-sidebar.css */
+
+:root {
+    --sidebar-width-desktop: 480px; /* JS会读取这个作为参考，但CSS也会用 */
+    --sidebar-width-mobile: 320px;  /* 移动端打开时的参考宽度 */
+    /* 或者如果移动端总是全屏： */
+    /* --sidebar-width-mobile: 100vw; */
+}
+
+.right-sidebar {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 1000; /* 确保在主内容之上，但低于模态框 */
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+
+    /* === CSS DRIVEN INITIAL STATE & WIDTH === */
+    width: var(--sidebar-width-desktop); /* CSS控制的默认/初始宽度 */
+    right: -100%; /* 初始时完全移出屏幕右侧 (相对于自身宽度) */
+    /* ======================================= */
+
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.sidebar-active .right-sidebar {
+    right: 0; /* 滑入屏幕 */
+}
+
+/* Sidebar Resizer Handle */
+.sidebar-resizer {
+    width: 8px;
+    cursor: ew-resize;
+    z-index: 1001;
+    background: transparent;
+    /* border-right: 1px solid rgba(0,0,0,0.1); /* Resizer 在右边 */
+    border-left: 1px solid rgba(0,0,0,0.1); /* Resizer 现在在侧边栏的左边 */
+    flex-shrink: 0;
+}
+.sidebar-resizer:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+/* NEW: Add a class to body when resizing to disable text selection and show global resize cursor */
+body.resizing-sidebar {
+    user-select: none; /* Disable text selection during drag */
+    cursor: ew-resize; /* Show resize cursor over entire page during drag */
+}
+
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000; /* 非常高，确保在最上层 */
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    backdrop-filter: blur(15px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-toggle .arrow-icon {
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Flip arrow when sidebar is active (on html) */
+/* Assuming default icon is ◀, active will be ▶ (or a rotated ◀) */
+html.sidebar-active .sidebar-toggle .arrow-icon {
+    transform: rotateY(180deg);
+}
+
+/* Sidebar Content Wrapper */
+.sidebar-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: hidden; /* 让内部的 .sidebar-section 自己滚动 */
+    box-sizing: border-box;
+    width: calc(100% - 8px); /* 减去 resizer 的宽度 */
+}
+
+/* Sidebar Tabs (AI Helper / Admin) */
+.sidebar-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 15px 25px 0 25px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(240, 147, 251, 0.03));
+    border-bottom: 1px solid var(--border-color-light);
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.sidebar-tab {
+    flex: 1;
+    padding: 12px 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.sidebar-tab.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom-color: var(--primary-color);
+}
+
+.sidebar-tab:hover:not(.active) {
+    color: var(--text-primary);
+    background: rgba(0,0,0,0.02);
+}
+
+/* Sidebar Sections (Content for each tab) */
+.sidebar-section {
+    display: none;
+    flex-grow: 1;
+    padding: 25px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sidebar-section.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* AI Chat Header (within AI Chat Section) */
+.ai-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color-light);
+    flex-shrink: 0;
+}
+
+.ai-chat-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ai-chat-modes {
+    display: flex;
+    gap: 5px;
+}
+
+.ai-chat-mode-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.05);
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ai-chat-mode-btn.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.ai-chat-mode-btn:hover:not(.active) {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}
+
+/* Adjustments for chat display and input within sidebar */
+.sidebar-section#aiChatSection .chat-display-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.sidebar-section#aiChatSection .chat-input-area {
+    flex-shrink: 0;
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.sidebar-section#aiChatSection #aiChatInput {
+    flex-grow: 1;
+    min-height: 40px;
+    max-height: 120px;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-size: 0.9em;
+    resize: none;
+    overflow-y: auto;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    box-sizing: border-box;
+}
+
+.sidebar-section#aiChatSection #aiChatSendBtn {
+    height: 40px;
+    padding: 0 18px;
+    font-size: 0.9em;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    flex-shrink: 0;
+}
+
+.sidebar-section#aiChatSection .chat-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+.sidebar-section#aiChatSection .action-btn {
+    padding: 8px 15px;
+    font-size: 0.85em;
+}
+.sidebar-section#aiChatSection #aiChatLoading {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Responsive adjustments for Right Sidebar */
+@media (max-width: 768px) {
+    .right-sidebar {
+        width: var(--sidebar-width-mobile); /* 移动端打开时的宽度 */
+        right: -100%; /* 确保初始也是完全移出 */
+        z-index: 2000; /* 确保覆盖 */
+        /* 如果移动端是全屏覆盖： */
+        /* width: 100vw; */
+        /* right: -100vw; */
+        box-shadow: none; /* 移动端全屏时通常不需要阴影 */
+    }
+
+    /* resizer 在移动端通常不需要，如果侧边栏是固定宽度或全屏 */
+    .sidebar-resizer {
+        display: none;
+    }
+    .sidebar-content-wrapper {
+        width: 100%; /* 移动端内容占满侧边栏 */
+    }
+
+    /* 确保切换按钮在移动端可见且可点 */
+    .sidebar-toggle {
+        top: 15px;
+        right: 15px;
+        width: 48px; /* 调整大小以适应触摸 */
+        height: 48px;
+        font-size: 1.1rem;
+        z-index: 3001; /* 确保在移动端更高 */
+        background: rgba(102, 126, 234, 0.8); /* 更明显背景 */
+        border-color: rgba(255,255,255,0.5);
+    }
+    .sidebar-toggle:hover {
+        transform: scale(1.05);
+    }
+
+    .sidebar-section {
+        padding: 15px;
+    }
+
+    .ai-chat-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .ai-chat-mode-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+
+    .sidebar-section#aiChatSection .chat-input-area {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .sidebar-section#aiChatSection #aiChatSendBtn {
+        width: 100%;
+        padding: 10px 0;
+        height: auto;
+    }
+    .sidebar-section#aiChatSection .chat-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .sidebar-section#aiChatSection .action-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar-toggle {
+        width: 48px;
+        height: 48px;
+        font-size: 1.1rem;
+        top: 12px;
+        right: 12px;
+    }
+    .sidebar-tabs {
+        padding: 10px 15px 0 15px;
+    }
+    .sidebar-tab {
+        padding: 10px 8px;
+        font-size: 0.9rem;
+    }
+    .sidebar-section {
+        padding: 10px;
+    }
+    .ai-chat-title {
+        font-size: 1rem;
+    }
+    .ai-chat-mode-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+    }
+    .sidebar-section#aiChatSection #aiChatInput {
+        min-height: 36px;
+        max-height: 100px;
+        font-size: 0.85em;
+        padding: 8px 12px;
+    }
+    .sidebar-section#aiChatSection #aiChatSendBtn {
+        font-size: 0.85em;
+    }
+    .sidebar-section#aiChatSection .action-btn {
+        font-size: 0.8em;
+    }
+}

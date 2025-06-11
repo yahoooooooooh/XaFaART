@@ -1,0 +1,132 @@
+
+
+/* css/navigation.css */
+
+/* Navigation Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    font-size: 0.95rem;
+    padding: 16px 24px;
+    background: var(--bg-card); /* MODIFIED: Use card background */
+    border-radius: 50px;
+    border: 1px solid var(--border-color-light); /* MODIFIED: Use theme border color */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* MODIFIED: Softer shadow */
+    max-width: fit-content; /* Allow it to shrink to content */
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    margin-top: 50px; /* ADDED: Add some top margin to compensate for removed header */
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 25px;
+    transition: var(--transition);
+    color: var(--text-secondary); /* MODIFIED: Use theme text color */
+    font-weight: 500;
+    white-space: nowrap; /* Prevent text wrapping within item */
+}
+
+.breadcrumb-item:hover:not(.current) {
+    background: rgba(0, 0, 0, 0.05); /* MODIFIED: Subtle dark hover on light background */
+    color: var(--text-primary); /* MODIFIED: Darker text on hover */
+    transform: translateY(-1px);
+}
+
+.breadcrumb-item.current {
+    color: var(--primary-color); /* MODIFIED: Theme primary color for text */
+    font-weight: 600; /* MODIFIED: Slightly less bold */
+    background: white; /* MODIFIED: Solid white background for active state */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    cursor: default;
+}
+
+.breadcrumb-separator {
+    color: var(--text-muted); /* MODIFIED: Use muted theme color */
+    font-weight: bold;
+    user-select: none; /* Prevent selection of separator */
+}
+
+/* Main Navigation Tabs */
+.main-navigation {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 30px;
+    background: var(--bg-card); /* MODIFIED: Use card background */
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color-light); /* MODIFIED: Use theme border color */
+    max-width: fit-content; /* Allow it to shrink to content */
+    flex-wrap: wrap; /* Allow tabs to wrap */
+    justify-content: center; /* Center tabs if they wrap */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* MODIFIED: Softer shadow */
+}
+
+.nav-tab {
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary); /* MODIFIED: Use theme text color */
+    background: transparent;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.nav-tab.active {
+    background: white; /* MODIFIED: Solid white background */
+    color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+}
+
+.nav-tab:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.05); /* MODIFIED: Subtle dark hover */
+    color: var(--text-primary); /* MODIFIED: Darker text on hover */
+}
+
+/* Tab Content Visibility */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeInTab 0.5s ease-in-out;
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments for navigation */
+@media (max-width: 768px) {
+    .breadcrumb {
+        padding: 12px 16px; /* Slightly smaller padding */
+        margin-left: auto; /* Center if space allows */
+        margin-right: auto;
+    }
+    .breadcrumb-item {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    .main-navigation {
+        /* Already has flex-wrap: wrap and justify-content: center */
+        border-radius: var(--border-radius-md); /* Less rounded on smaller screens */
+    }
+    .nav-tab {
+        font-size: 0.9rem;
+        padding: 10px 18px;
+    }
+}

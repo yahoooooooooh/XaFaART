@@ -1,0 +1,343 @@
+/* css/ai-diagnostic.css - Now general styles for AI chat content */
+
+/* This file now primarily styles the chat messages and input within the AI chat sidebar section */
+
+/* --- Chat Display Area --- */
+.chat-display-area {
+    /* Styles are moved to right-sidebar.css for flex-grow, overflow, padding-right, gap */
+    /* These ensure it scrolls and expands correctly within the sidebar */
+}
+
+.chat-display-area .message {
+    padding: 12px 18px;
+    border-radius: var(--border-radius-md); /* Using CSS variable */
+    max-width: 88%; /* Constrain message width */
+    word-wrap: break-word;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+}
+
+.chat-display-area .user-message {
+    background-color: var(--primary-color); /* Using CSS variable */
+    color: white;
+    align-self: flex-end; /* Align user messages to the right */
+    border-bottom-right-radius: 4px;
+}
+.chat-display-area .user-message strong {
+    color: rgba(255,255,255,0.8);
+}
+
+.chat-display-area .assistant-message {
+    background-color: var(--bg-overlay); /* Using CSS variable */
+    color: var(--text-primary); /* Using CSS variable */
+    align-self: flex-start; /* Align assistant messages to the left */
+    border: 1px solid var(--border-color-light); /* Using CSS variable */
+    border-bottom-left-radius: 4px;
+}
+.chat-display-area .assistant-message strong {
+    color: var(--primary-color); /* Using CSS variable */
+}
+
+.chat-display-area .system-message {
+    background-color: var(--warning-color-light); /* Using CSS variable */
+    color: var(--warning-color-dark); /* Using CSS variable */
+    font-style: italic;
+    font-size: 0.85em;
+    text-align: center;
+    align-self: center; /* Center system messages */
+    max-width: 95%;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm); /* Using CSS variable */
+    box-sizing: border-box;
+}
+
+.chat-display-area .message > strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+.chat-display-area .message .message-text {
+    white-space: pre-wrap; /* Preserve whitespace and allow wrapping */
+}
+
+/* --- Input Area and Buttons --- */
+/* These styles are now largely defined in right-sidebar.css for the new structure */
+/* Retaining general styles that apply to the elements themselves */
+
+/* Example: The textarea and send button general styles can be here */
+/*
+.input-area #aiChatInput { ... }
+.input-area #aiChatSendBtn { ... }
+.chat-actions .action-btn { ... }
+*/
+
+/* AI loading dots (now in right-sidebar.css and app.js) */
+/*
+#aiChatLoading { ... }
+#aiChatLoading .thinking-dots span { ... }
+@keyframes diagnosticLoadingBounce { ... }
+*/
+
+/* --- Markdown Rendering Styles (specific for AI Assistant messages) --- */
+/* These styles are for the content WITHIN the assistant-message .message-text span */
+.chat-display-area .assistant-message .message-text h1,
+.chat-display-area .assistant-message .message-text h2,
+.chat-display-area .assistant-message .message-text h3 {
+    color: var(--text-primary);
+    margin: 1em 0 0.5em 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+.chat-display-area .assistant-message .message-text h1 {
+    font-size: 1.4em;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.3em;
+}
+.chat-display-area .assistant-message .message-text h2 {
+    font-size: 1.2em;
+    border-bottom: 1px solid var(--border-color-light); /* Using CSS variable */
+    padding-bottom: 0.2em;
+}
+.chat-display-area .assistant-message .message-text h3 {
+    font-size: 1.05em;
+    color: var(--primary-color);
+}
+
+/* Icons for headings based on text content (used by MarkdownRenderer) */
+.chat-display-area .assistant-message .message-text h2:before,
+.chat-display-area .assistant-message .message-text h3:before {
+    font-size: 1em;
+    margin-right: 0.5em;
+    color: var(--primary-color);
+}
+.chat-display-area .assistant-message .message-text h2:has-text("正确答案解析"):before,
+.chat-display-area .assistant-message .message-text h2:has-text("🎯"):before { content: "🎯"; }
+.chat-display-area .assistant-message .message-text h2:has-text("错误选项分析"):before,
+.chat-display-area .assistant-message .message-text h2:has-text("❌"):before { content: "❌"; }
+.chat-display-area .assistant-message .message-text h2:has-text("知识拓展"):before,
+.chat-display-area .assistant-message .message-text h2:has-text("💡"):before { content: "💡"; }
+.chat-display-area .assistant-message .message-text h2:has-text("学习建议"):before,
+.chat-display-area .assistant-message .message-text h2:has-text("📚"):before { content: "📚"; }
+
+
+.chat-display-area .assistant-message .message-text p {
+    margin: 0.8em 0;
+    line-height: 1.65;
+    color: var(--text-secondary);
+}
+.chat-display-area .assistant-message .message-text p:first-child { margin-top: 0.3em; }
+.chat-display-area .assistant-message .message-text p:last-child { margin-bottom: 0; }
+
+
+.chat-display-area .assistant-message .message-text ul,
+.chat-display-area .assistant-message .message-text ol {
+    margin: 0.8em 0 0.8em 25px;
+    padding-left: 0;
+    color: var(--text-secondary);
+}
+.chat-display-area .assistant-message .message-text li {
+    margin-bottom: 0.4em;
+    line-height: 1.6;
+}
+.chat-display-area .assistant-message .message-text ul li::marker {
+    color: var(--primary-color);
+}
+.chat-display-area .assistant-message .message-text ol {
+    list-style-type: decimal;
+}
+.chat-display-area .assistant-message .message-text ol li::marker {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+
+.chat-display-area .assistant-message .message-text pre {
+    background-color: var(--code-bg-color); /* Using CSS variable */
+    color: var(--code-text-color); /* Using CSS variable */
+    padding: 1em;
+    border-radius: var(--border-radius-sm); /* Using CSS variable */
+    overflow-x: auto;
+    margin: 1em 0;
+    font-size: 0.88em;
+    line-height: 1.5;
+}
+.chat-display-area .assistant-message .message-text code {
+    font-family: var(--font-family-monospace, Menlo, Monaco, Consolas, "Courier New", monospace);
+    background-color: var(--inline-code-bg-color); /* Using CSS variable */
+    color: var(--primary-color-dark); /* Using CSS variable */
+    padding: 0.2em 0.4em;
+    border-radius: var(--border-radius-xs); /* Using CSS variable */
+    font-size: 0.88em;
+}
+.chat-display-area .assistant-message .message-text pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: 1em;
+    border: none;
+}
+
+.chat-display-area .assistant-message .message-text strong {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.chat-display-area .assistant-message .message-text em {
+    font-style: italic;
+    color: var(--primary-color);
+}
+.chat-display-area .assistant-message .message-text strong em,
+.chat-display-area .assistant-message .message-text em strong {
+    color: var(--secondary-color);
+}
+
+
+.chat-display-area .assistant-message .message-text blockquote {
+    border-left: 4px solid var(--accent-color); /* Using CSS variable */
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    background: rgba(240, 147, 251, 0.08);
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0; /* Using CSS variable */
+    font-style: italic;
+    color: var(--text-muted);
+}
+.chat-display-area .assistant-message .message-text blockquote p {
+    margin: 0.5em 0;
+}
+
+
+.chat-display-area .assistant-message .message-text a {
+    color: var(--primary-color); /* Using CSS variable */
+    text-decoration: underline;
+    text-decoration-color: rgba(102, 126, 234, 0.5);
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+.chat-display-area .assistant-message .message-text a:hover {
+    color: var(--primary-hover); /* Using CSS variable */
+    text-decoration-color: var(--primary-hover); /* Using CSS variable */
+}
+
+.chat-display-area .assistant-message .message-text hr {
+    border: none;
+    border-top: 1px solid var(--border-color-light); /* Using CSS variable */
+    margin: 1.5em 0;
+}
+
+.chat-display-area .assistant-message .message-text table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: 0.9em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.chat-display-area .assistant-message .message-text th,
+.chat-display-area .assistant-message .message-text td {
+    border: 1px solid var(--border-color); /* Using CSS variable */
+    padding: 0.6em 0.8em;
+    text-align: left;
+}
+.chat-display-area .assistant-message .message-text th {
+    background-color: var(--primary-color-xlight); /* Using CSS variable */
+    color: var(--primary-color-dark); /* Using CSS variable */
+    font-weight: 600;
+}
+.chat-display-area .assistant-message .message-text tr:nth-child(even) {
+    background-color: var(--bg-overlay); /* Using CSS variable */
+}
+
+/* Scrollbar styling for AI Chat Display Area */
+.chat-display-area::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-display-area::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 4px;
+}
+.chat-display-area::-webkit-scrollbar-thumb {
+    background: var(--primary-color-light, #bdc5f0); /* Fallback light primary color */
+    border-radius: 4px;
+}
+.chat-display-area::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Responsive for AI Chat Content */
+@media (max-width: 768px) {
+    .chat-display-area .message {
+        padding: 10px 15px;
+        max-width: 95%;
+        font-size: 0.9em;
+    }
+    .chat-display-area .message > strong {
+        font-size: 0.8em;
+    }
+    /* Markdown Adjustments */
+    .chat-display-area .assistant-message .message-text h1 { font-size: 1.3em; }
+    .chat-display-area .assistant-message .message-text h2 { font-size: 1.1em; }
+    .chat-display-area .assistant-message .message-text h3 { font-size: 1em; }
+    .chat-display-area .assistant-message .message-text p { font-size: 0.9em; }
+    .chat-display-area .assistant-message .message-text ul, .chat-display-area .assistant-message .message-text ol { margin-left: 20px; }
+    .chat-display-area .assistant-message .message-text code { font-size: 0.85em; }
+    .chat-display-area .assistant-message .message-text pre { padding: 0.8em; }
+    .chat-display-area .assistant-message .message-text table { font-size: 0.8em; }
+}
+
+@media (max-width: 480px) {
+    .chat-display-area .message { font-size: 0.8em; padding: 8px 12px; }
+    /* Markdown Adjustments */
+    .chat-display-area .assistant-message .message-text h1 { font-size: 1.2em; }
+    .chat-display-area .assistant-message .message-text h2 { font-size: 1em; }
+    .chat-display-area .assistant-message .message-text h3 { font-size: 0.9em; }
+    .chat-display-area .assistant-message .message-text p { font-size: 0.8em; }
+    .chat-display-area .assistant-message .message-text ul, .chat-display-area .assistant-message .message-text ol { margin-left: 15px; }
+    .chat-display-area .assistant-message .message-text code { font-size: 0.8em; }
+    .chat-display-area .assistant-message .message-text pre { padding: 0.7em; }
+    .chat-display-area .assistant-message .message-text table { font-size: 0.75em; }
+}
+
+/* 在 right-sidebar.css 或 ai-diagnostic.css (如果后者还有效的话) */
+
+/* ... 其他样式 ... */
+
+.sidebar-section#aiChatSection #aiChatInput {
+    flex-grow: 1;
+    /* min-height: 40px; */ /* 移除或调整为新基础高度 */
+    height: auto; /* 允许JS动态设置高度 */
+    min-height: 42px; /* 设置一个合适的初始单行高度，包括padding */
+    max-height: 120px; /* 限制最大高度，例如约等于4-5行文本 */
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-size: 0.95em; /* 稍微增大字体，原为0.9em */
+    line-height: 1.5;  /* 增加行高，改善多行可读性 */
+    resize: none;      /* 禁止用户手动调整大小 */
+    overflow-y: auto;  /* 当内容超过max-height时显示滚动条 */
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    box-sizing: border-box;
+    font-family: inherit; /* 确保继承 body 的字体 */
+    transition: height 0.1s ease-out; /* 平滑高度过渡，可选 */
+}
+
+/* 当输入框聚焦时的样式 (可选增强) */
+.sidebar-section#aiChatSection #aiChatInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb, 102, 126, 234), 0.2); /* 使用var(--primary-color-rgb)如果定义了，否则用默认值 */
+}
+
+/* ... 其他样式 ... */
+
+/* 确保 Send 按钮和输入框在 flex 容器中垂直对齐 (如果它们是兄弟元素) */
+.sidebar-section#aiChatSection .chat-input-area {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end; /* 关键：让按钮和输入框底部对齐 */
+}
+
+/* 如果发送按钮因为输入框变高而显得太矮，可以给它一个固定的最小高度或使其与输入框同步（较复杂）*/
+.sidebar-section#aiChatSection #aiChatSendBtn {
+    height: 42px; /* 与输入框的 min-height 匹配，或者您希望的固定高度 */
+    /* ... 其他发送按钮样式 ... */
+}

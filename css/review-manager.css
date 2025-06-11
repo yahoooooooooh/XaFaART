@@ -1,0 +1,620 @@
+/* css/review-manager.css */
+
+/* Review Page Styles */
+.review-page {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color-light);
+}
+
+.review-header h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.review-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* Filters Panel */
+.filters-panel {
+    margin-bottom: 25px;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color-light);
+    box-sizing: border-box;
+}
+
+.filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.filter-group select {
+    padding: 10px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color-light);
+    font-size: 0.9rem;
+    background: white;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Review Statistics */
+.review-stats {
+    margin-bottom: 25px;
+}
+
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(240, 147, 251, 0.03));
+    padding: 15px;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    box-sizing: border-box;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Incorrect Questions List */
+.incorrect-questions-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.incorrect-question-card {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color-light);
+    transition: var(--transition);
+    box-sizing: border-box;
+}
+
+.incorrect-question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.question-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.question-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+.question-source {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+.question-section {
+    background: rgba(0,0,0,0.05);
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.question-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+.question-actions button:hover { background: rgba(0,0,0,0.05); }
+.mark-btn.marked { color: var(--warning-color); }
+
+.question-content .question-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+.question-options {
+    margin: 15px 0;
+}
+.question-options .option {
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.option.correct { background: rgba(72, 187, 120, 0.1); }
+.option.user-choice:not(.correct) { background: rgba(229, 62, 62, 0.1); }
+.option-label { font-weight: 500; }
+.correct-mark, .wrong-mark { margin-left: auto; font-weight: bold; }
+.correct-mark { color: var(--success-color); }
+.wrong-mark { color: var(--error-color); }
+
+.question-explanation {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    border-left: 3px solid var(--primary-color);
+}
+.question-explanation strong { color: var(--text-primary); }
+
+.question-card-footer {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color-light);
+}
+
+.question-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+.mastery-level { color: var(--warning-color); }
+
+/* Review Container (Modal) */
+.review-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-body);
+    z-index: 1500;
+    padding: 0;
+    overflow: hidden;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                right 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* MODIFIED: When HTML has sidebar-active class, shift the review container */
+html.sidebar-active .review-container {
+    /* right: var(--sidebar-width-desktop); <-- JS 会直接更新 */
+    /* left: 0; */ /* left 保持为0 */
+    /* width: calc(100% - var(--sidebar-width-desktop)); <-- JS 会直接更新 */
+}
+
+.review-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%; height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    box-sizing: border-box;
+}
+.review-header {
+    text-align: center;
+    padding: 20px 25px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-bottom: 1px solid var(--border-color-light);
+    position: relative;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+.review-close-btn {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    z-index: 1;
+}
+.review-close-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+.review-progress-container {
+    width: calc(100% - 50px); margin: 15px auto;
+    background: #f7fafc; border-radius: 50px; height: 18px;
+    overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+.review-progress-bar {
+    width: 0%; height: 100%;
+    background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+    text-align: center; line-height: 18px; color: white;
+    transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    font-size: 0.75em; font-weight: 600;
+}
+
+.review-content-area {
+    flex-grow: 1; overflow-y: auto; padding: 0 25px 15px 25px;
+    box-sizing: border-box;
+}
+#reviewQuestionArea {
+    margin: 15px auto;
+    max-width: 800px;
+}
+
+.review-question-block {
+    background: var(--bg-card); padding: 20px; border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+.review-question-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--warning-color) 0%, var(--primary-color) 100%);
+    border-top-left-radius: var(--border-radius-md);
+    border-bottom-left-radius: var(--border-radius-md);
+}
+
+.review-question-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color-light);
+}
+.question-source-info { font-size: 0.8rem; color: var(--text-muted); }
+.question-mastery { font-size: 0.9rem; color: var(--warning-color); }
+
+.review-question-content .question-text {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+.review-options {
+    display: grid; gap: 10px; margin: 15px 0;
+}
+.review-options .review-option {
+    display: flex; align-items: center; padding: 12px 15px;
+    border-radius: var(--border-radius-sm); background: #f7fafc; cursor: pointer;
+    border: 2px solid transparent; color: var(--text-secondary);
+    font-weight: 500;
+    position: relative;
+    box-sizing: border-box;
+}
+.review-options .review-option.view-mode { cursor: default; }
+
+/* Custom radio/checkbox for review options */
+.review-options .review-option .custom-radio,
+.review-options .review-option .custom-checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border-color-light);
+    margin-right: 12px; flex-shrink: 0; position: relative;
+    transition: var(--transition);
+}
+.review-options .review-option .custom-radio { border-radius: 50%; }
+.review-options .review-option .custom-checkbox { border-radius: 3px; }
+
+/* Checked states for custom radio/checkbox in review mode */
+.review-options input[type="radio"]:checked + .custom-radio { border-color: var(--primary-color); }
+.review-options input[type="radio"]:checked + .custom-radio::after {
+    content: ''; width: 10px; height: 10px; background: var(--primary-color);
+    border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.review-options input[type="checkbox"]:checked + .custom-checkbox { border-color: var(--primary-color); background-color: var(--primary-color); }
+.review-options input[type="checkbox"]:checked + .custom-checkbox::after {
+    content: ''; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0;
+    position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
+}
+.review-options .review-option.selected-option {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(240, 147, 251, 0.1));
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+
+/* Highlight after submission (or in view mode) */
+.review-options .review-option.correct-highlight {
+    background: rgba(72, 187, 120, 0.1) !important;
+    border-color: var(--success-color) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600;
+}
+.review-options .review-option.incorrect-highlight {
+    background: rgba(229, 62, 62, 0.1) !important;
+    border-color: var(--error-color) !important;
+    color: var(--text-primary) !important;
+}
+.review-options .review-option.missed-correct-highlight {
+    background: var(--missed-correct-bg) !important;
+    border-color: var(--missed-correct-color) !important;
+    color: var(--text-primary) !important;
+}
+
+
+.review-explanation, .review-history {
+    margin-top: 15px; padding: 12px; background: #f8fafc;
+    border-radius: var(--border-radius-sm); font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    box-sizing: border-box;
+}
+.review-explanation h4 {
+    font-size: 1em;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+.review-history p {
+    margin: 5px 0;
+}
+
+
+.review-result {
+    margin-top: 15px; padding: 15px; border-radius: var(--border-radius-md);
+    box-sizing: border-box;
+    animation: fadeInExplanation 0.4s ease-out 0.2s forwards;
+    opacity: 0;
+}
+.review-result.correct { background: rgba(72, 187, 120, 0.1); border-left: 3px solid var(--success-color); }
+.review-result.incorrect { background: rgba(229, 62, 62, 0.1); border-left: 3px solid var(--error-color); }
+.result-header { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; margin-bottom: 10px; }
+.result-header .result-icon { font-size: 1.3rem; }
+.result-details, .result-explanation {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.result-details strong, .result-explanation strong {
+    color: var(--text-primary);
+}
+
+
+.review-navigation-controls {
+    padding: 15px 25px; border-top: 1px solid var(--border-color-light);
+    background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(250,250,252,0.8));
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+.review-navigation-buttons {
+    display: flex; justify-content: space-between; gap: 10px;
+}
+#reviewSubmitBtn {
+    background: linear-gradient(135deg, var(--success-color), #38a169);
+    color: white;
+    box-shadow: 0 4px 15px rgba(var(--success-rgb), 0.3);
+}
+#reviewSubmitBtn:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--success-rgb), 0.4);
+}
+
+
+/* Responsive Design for Review Manager */
+@media (max-width: 768px) {
+    /* On mobile, sidebar is an overlay, so review-container remains full screen */
+    html.sidebar-active .review-container {
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
+    .review-page {
+        padding: 20px;
+    }
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .review-header h2 {
+        font-size: 1.5rem;
+    }
+    .review-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .action-btn {
+        flex-grow: 1;
+        justify-content: center;
+        padding: 8px 15px;
+        font-size: 0.85rem;
+    }
+    .filters-panel {
+        padding: 15px;
+    }
+    .filters-row {
+        grid-template-columns: 1fr;
+    }
+    .review-stats .stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .stat-item {
+        padding: 12px;
+    }
+    .stat-value {
+        font-size: 1.3rem;
+    }
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    .incorrect-question-card {
+        padding: 15px;
+    }
+    .question-content .question-text {
+        font-size: 1rem;
+    }
+    .question-meta {
+        font-size: 0.75rem;
+    }
+    .question-actions button {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+
+    .review-container {
+        padding: 0;
+    }
+    .review-header {
+        padding: 15px 20px;
+    }
+    .review-close-btn {
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    .review-progress-container {
+        width: calc(100% - 30px);
+        margin: 10px auto;
+    }
+    .review-content-area {
+        padding: 0 15px 10px 15px;
+    }
+    .review-question-block {
+        padding: 15px;
+    }
+    .review-question-content .question-text {
+        font-size: 1.05rem;
+    }
+    .review-options .review-option {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    .review-navigation-controls {
+        padding: 12px 15px;
+    }
+    .review-navigation-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .nav-btn, #reviewSubmitBtn {
+        width: 100%;
+        min-width: unset;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .review-page, .statistics-page {
+        padding: 15px;
+    }
+    .review-header h2, .statistics-header h2 {
+        font-size: 1.3rem;
+    }
+    .stats-summary {
+        grid-template-columns: 1fr;
+    }
+    .stat-item {
+        padding: 10px;
+    }
+    .stat-value {
+        font-size: 1.1rem;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    .incorrect-question-card {
+        padding: 12px;
+    }
+    .question-content .question-text {
+        font-size: 0.95rem;
+    }
+    .question-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .question-actions button {
+        width: 24px;
+        height: 24px;
+        font-size: 0.9rem;
+    }
+    .review-progress-container {
+        height: 16px;
+    }
+    .review-progress-bar {
+        line-height: 16px;
+        font-size: 0.7rem;
+    }
+    .review-question-block {
+        padding: 12px;
+    }
+    .review-question-content .question-text {
+        font-size: 0.95rem;
+    }
+    .review-options .review-option {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+    .review-navigation-controls {
+        padding: 10px 12px;
+    }
+    .nav-btn, #reviewSubmitBtn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+}

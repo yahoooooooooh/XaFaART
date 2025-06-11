@@ -4,98 +4,440 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学习助手 - 艺术史与世界常识</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- 统一引入所有模块化的 CSS 文件 -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/ai-features.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/quiz-engine.css">
+    <link rel="stylesheet" href="css/review-manager.css">
+    <link rel="stylesheet" href="css/statistics-manager.css">
+    <link rel="stylesheet" href="css/utilities.css">
+    
+    <!-- 新增：引入左侧侧边栏的CSS -->
+    <link rel="stylesheet" href="css/right-sidebar.css">
+    <!-- 原ai-diagnostic.css现在主要用于AI聊天内容的样式，而非对话框本身 -->
+    <link rel="stylesheet" href="css/ai-diagnostic.css">
+
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Admin Toggle Button -->
-    <button class="admin-toggle" id="adminToggle" title="管理题库">⚙️</button>
+    <!-- Sidebar Toggle Button - MOVED TO TOP LEVEL OF BODY -->
+    <!-- 这个按钮现在负责整个左侧面板的打开/关闭 -->
+    <button class="sidebar-toggle" id="leftSidebarToggle" title="打开/关闭侧边栏">
+        <span class="arrow-icon">▶</span>
+    </button>
 
-    <!-- Admin Panel -->
-    <div class="admin-panel" id="adminPanel">
-        <h3>📚 题库管理</h3>
-        
-        <form class="admin-form" id="addQuizForm">
-            <label>学科分类</label>
-            <select id="subjectSelect" required>
-                <option value="">请选择学科</option>
-                <option value="western_art">西方艺术史</option>
-                <option value="chinese_art">中国美术史</option>
-                <option value="art_theory">艺术概论</option>
-                <option value="world_knowledge">世界常识</option>
-            </select>
-
-            <label>时期分类</label>
-            <select id="periodSelect" required>
-                <option value="">请先选择学科</option>
-            </select>
-            <input type="text" id="customPeriodInput" placeholder="或输入自定义分类名称" style="margin-top: 8px;">
-
-            <label>题库名称</label>
-            <input type="text" id="quizNameInput" placeholder="如：印象派初级题库、文史基础100题" required>
-
-            <label>题库描述</label>
-            <textarea id="quizDescInput" placeholder="简要描述这个题库的内容" rows="3"></textarea>
-
-            <label>难度等级</label>
-            <select id="difficultySelect" required>
-                <option value="easy">初级</option>
-                <option value="medium">中级</option>
-                <option value="hard">高级</option>
-            </select>
-
-            <label>预计用时</label>
-            <input type="text" id="estimatedTimeInput" placeholder="如：15-20分钟" required>
-
-            <button type="submit">✅ 添加题库</button>
-        </form>
-
-        <!-- 数据备份管理区域 -->
-        <div class="backup-section">
-            <h4>💾 数据备份管理</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                <button type="button" id="backupDataBtn" style="background: #805ad5; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
-                    📦 备份数据
-                </button>
-                <button type="button" id="restoreDataBtn" style="background: #38a169; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
-                    📂 恢复数据
-                </button>
+    <!-- Left Sidebar Container -->
+    <div class="right-sidebar" id="leftSidebar">
+        <!-- 侧边栏宽度调节手柄 - MODIFIED: Moved inside right-sidebar and is its first child -->
+        <div class="sidebar-resizer" id="sidebarResizer"></div>
+        <div class="sidebar-content-wrapper" id="sidebarContentWrapper">
+            <!-- Tab 导航区 -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="ai-chat">🧠 AI助手</button>
+                <button class="sidebar-tab" data-tab="admin-panel">⚙️ 管理</button>
             </div>
-            <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
-            <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;">
-                💡 <strong>使用说明：</strong><br>
-                • 备份：下载当前所有题库数据到本地JSON文件<br>
-                • 恢复：选择备份的JSON文件来恢复题库数据<br>
-                • 建议定期备份，防止数据丢失
+
+            <!-- AI Chat Section (formerly aiDiagnosticDialog content) -->
+            <div class="sidebar-section active" id="aiChatSection">
+                <div class="ai-chat-header">
+                    <span class="ai-chat-title">AI助手</span>
+                    <!-- AI功能模式按钮 (作为按钮组) -->
+                    <div class="ai-chat-modes">
+                        <button class="ai-chat-mode-btn active" data-mode="general" title="通用对话">💬</button>
+                        <button class="ai-chat-mode-btn" data-mode="diagnose" title="学情诊断">📊</button>
+                        <button class="ai-chat-mode-btn" data-mode="hint" title="题目提示">💡</button>
+                        <button class="ai-chat-mode-btn" data-mode="explain" title="题目解析">📝</button>
+                        <!-- 新增的按钮，专门用于平行时空的题目互动 -->
+                        <button class="ai-chat-mode-btn" data-mode="essay_feedback" title="平行时空扩展">🌍</button>
+                    </div>
+                </div>
+                <div class="chat-display-area" id="aiChatDisplay">
+                    <!-- 消息会显示在这里 -->
+                </div>
+                <div class="chat-input-area">
+                    <textarea id="aiChatInput" placeholder="输入你的问题或请求..." rows="1"></textarea>
+                    <button id="aiChatSendBtn" class="action-btn primary">发送</button>
+                </div>
+                <div class="chat-actions">
+                    <button id="aiChatNewChatBtn" class="action-btn secondary">新对话</button>
+                    <button id="aiChatAbortBtn" class="action-btn danger" style="display: none;">中止</button>
+                    <span id="aiChatLoading" style="display: none;">🧠思考中...</span>
+                </div>
+            </div>
+
+            <!-- Admin Panel Section (existing admin-panel content moved here) -->
+            <div class="sidebar-section" id="adminPanelSection">
+                <!-- AI服务用量 (估算) - MOVED HERE -->
+                <div class="api-usage-stats-container" style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
+                    <h4>📊 AI服务用量 (估算)</h4>
+                    <div class="api-stat-item">
+                        <span>今日已用/剩余调用：</span>
+                        <strong id="apiTodayUsed">0</strong> / <strong id="apiTodayRemaining">500</strong>
+                    </div>
+                    <div class="api-progress-bar-container">
+                        <div class="api-progress-bar-fill" id="apiTodayProgressBar" style="width: 0%;"></div>
+                    </div>
+                    <div class="api-stat-item" style="margin-top: 8px;">
+                        <span>历史总调用次数：</span>
+                        <strong id="apiTotalCalls">0</strong>
+                    </div>
+                    <div class="api-stat-item" style="margin-top: 8px;">
+                        <span>今日已用 Tokens：</span>
+                        <strong id="apiTokensToday">0</strong>
+                    </div>
+                    <div class="api-stat-item" style="margin-top: 8px;">
+                        <span>历史累计 Tokens：</span>
+                        <strong id="apiTokensTotal">0</strong>
+                    </div>
+                    <small style="display: block; margin-top: 10px; color: #777; font-size: 0.8em;">
+                        * 此为本地估算值，每日自动重置。实际用量请参考云服务控制台。
+                    </small>
+                    <!-- (可选) 测试用重置按钮 -->
+                    <!-- <button onclick="window.apiMetricsManager && window.apiMetricsManager.resetAllCountsForTesting()">重置计数(测试)</button> -->
+                </div>
+                <!-- END OF MOVED BLOCK -->
+
+                <h3>📚 题库管理</h3>
+
+                <!-- AI助手区块 -->
+                <div class="ai-assistant-section" id="aiAssistantSection">
+                    <h4>🧠 AI智能助手</h4>
+                    <p class="ai-section-desc">使用AI快速生成题库内容，大幅提升创建效率</p>
+                    
+                    <div class="prompt-builder">
+                        <h5>📝 智能Prompt参数设置</h5>
+                        
+                        <!-- 📌 多行 Prompt 容器 -->
+                        <div id="multiPromptRows"></div>
+
+                        <!-- 隐藏模板 -->
+                        <template id="promptRowTpl">
+                          <div class="prompt-row">
+                            <select class="subject-select"></select>
+                            <select class="period-select"></select>
+                            <input  type="number" class="count-input" value="10" min="1">
+                            <button type="button" class="remove-row">🗑</button>
+                          </div>
+                        </template>
+
+                        <button type="button" id="addPromptRow" class="ai-btn primary">＋ 添加学科/数量组合</button>
+                        <!-- END OF NEW MULTI-ROW SECTION -->
+
+                        <!-- GLOBAL SETTINGS (Difficulty, Estimated Time, Reference) -->
+                        <h5 style="margin-top:15px; border-top:1px dashed #ccc; padding-top:15px; font-size:1.1rem; margin-bottom:15px;">⚙️ 全局生成设置 (应用于上方所有条目)</h5>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>难度等级</label>
+                                <select id="aiDifficultySelect">
+                                    <option value="easy">初级</option>
+                                    <option value="medium" selected>中级</option>
+                                    <option value="hard">高级</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>预计用时</label>
+                                <select id="aiEstimatedTimeSelect">
+                                    <option value="5-10分钟">5-10 分钟</option>
+                                    <option value="10-15分钟" selected>10-15 分钟</option>
+                                    <option value="15-20分钟">15-20 分钟</option>
+                                    <option value="20-30分钟">20-30 分钟</option>
+                                    <option value="30-45分钟">30-45 分钟</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>参考资料</label>
+                                <select id="aiHasReference">
+                                    <option value="no">无，AI自主生成</option>
+                                    <option value="yes">有，我将提供材料</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <!-- Empty column for alignment or future use -->
+                            </div>
+                        </div>
+                        <!-- END GLOBAL SETTINGS -->
+                        
+                        <div class="ai-buttons">
+                            <button type="button" id="generatePromptBtn" class="ai-btn primary">
+                                📄 生成并复制Prompt
+                            </button>
+                            <button type="button" id="uploadAIResultBtn" class="ai-btn secondary">
+                                📥 导入AI结果JSON
+                            </button>
+                        </div>
+                        
+                        <div class="ai-tips">
+                            <p><strong>💡 使用提示：</strong></p>
+                            <p>1. 设置学科、时期、数量（可添加多行），以及全局参数</p>
+                            <p>2. 点击「生成并复制Prompt」</p>
+                            <p>3. 将指令粘贴到AI工具中获取JSON结果</p>
+                            <p>4. 点击「导入AI结果JSON」导入题库</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 传统添加题库表单 (注释掉) -->
+                <!--
+                <form class="admin-form" id="addQuizForm">
+                    <label>学科分类</label>
+                    <select id="subjectSelect" required>
+                        <option value="">请选择学科</option>
+                        <option value="western_art">外国艺术史</option>
+                        <option value="chinese_art">中国美术史</option>
+                        <option value="art_theory">艺术概论</option>
+                        <option value="postgraduate_politics">考研政治</option>
+                        <option value="world_knowledge">世界常识</option>
+                        <option value="english_mcq">英语选择题</option>
+                    </select>
+
+                    <label>时期分类</label>
+                    <select id="periodSelect" required>
+                        <option value="">请先选择学科</option>
+                    </select>
+                    <input type="text" id="customPeriodInput" placeholder="或输入自定义分类名称" style="margin-top: 8px;">
+
+                    <label>题库名称</label>
+                    <input type="text" id="quizNameInput" placeholder="如：印象派初级题库、文史基础100题" required>
+
+                    <label>题库描述</label>
+                    <textarea id="quizDescInput" placeholder="简要描述这个题库的内容" rows="3"></textarea>
+
+                    <label>难度等级</label>
+                    <select id="difficultySelect" required>
+                        <option value="easy">初级</option>
+                        <option value="medium">中级</option>
+                        <option value="hard">高级</option>
+                    </select>
+
+                    <label>预计用时</label>
+                    <input type="text" id="estimatedTimeInput" placeholder="如：15-20分钟" required>
+
+                    <button type="submit">✅ 添加题库</button>
+                </form>
+                -->
+
+                <!-- 数据备份管理区域 -->
+                <div class="backup-section">
+                    <h4>💾 数据备份管理</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                        <button type="button" id="backupDataBtn" style="background: var(--secondary-color); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
+                            📦 备份数据
+                        </button>
+                        <button type="button" id="restoreDataBtn" style="background: var(--success-color); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
+                            📂 恢复数据
+                        </button>
+                    </div>
+                    <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
+                    <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4; margin-bottom: 15px;">
+                        💡 <strong>使用说明：</strong><br>
+                        • 备份：同时在内部创建备份并下载当前所有题库数据到本地JSON文件<br>
+                        • 恢复：选择备份的JSON文件来恢复题库数据<br>
+                        • 建议定期备份，防止数据丢失
+                    </div>
+                    <!-- MODIFIED: Added container for backup list -->
+                    <h5>📦 内部备份列表</h5>
+                    <div id="adminBackupListContainer" class="backup-list" style="margin-top: 10px; margin-bottom:15px; border: 1px solid #e2e8f0; border-radius: 6px; background: white;">
+                        <!-- Backup list will be rendered here by JS -->
+                        <p style="padding: 10px; text-align: center; color: var(--text-muted);">正在加载备份列表...</p>
+                    </div>
+                    <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;">
+                        • "清理存储"功能会自动保留最近10条内部备份并删除更早的备份。<br>
+                        • 您也可以在此手动删除特定的内部备份。
+                    </div>
+                </div>
+
+                <!-- 存储状态管理区域 -->
+                <div class="storage-status-section">
+                    <h4>💾 存储状态</h4>
+                    <div id="storageStatusInfo" class="storage-info-grid">
+                        <!-- 存储状态信息将在这里显示 -->
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button type="button" id="checkStorageBtn" style="background: var(--primary-color); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
+                            📊 检查存储状态
+                        </button>
+                        <button type="button" id="cleanupStorageBtn" style="background: var(--warning-color); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500;">
+                            🗑️ 清理存储
+                        </button>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button type="button" id="exportAllDataBtn" style="background: var(--success-color); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; cursor: pointer; font-weight: 500; width: 100%;">
+                            📤 导出完整数据
+                        </button>
+                    </div>
+                    <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4; margin-top: 10px;">
+                        💡 <strong>存储说明：</strong><br>
+                        • 系统优先使用IndexedDB（支持大容量）<br>
+                        • 不支持时自动回退到localStorage<br>
+                        • 定期检查存储状态，及时清理数据
+                    </div>
+                </div>
+
+                <!-- 题目数据编辑器 (注释掉) -->
+                <!--
+                <div class="quiz-data-editor">
+                    <h4>📝 题目数据 (手动添加/编辑时使用)</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                        <p style="font-size: 0.9em; color: var(--text-muted); margin: 0; flex: 1;">
+                            在下方粘贴题目数据（JSON格式），点击"添加题库"时会自动读取
+                        </p>
+                        <button type="button" id="copyInstructionBtn" style="background: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; cursor: pointer; white-space: nowrap;">
+                            📄 获取AI生成指令
+                        </button>
+                    </div>
+                    <textarea id="quizDataInput" placeholder='手动添加题目时，请粘贴JSON数组格式的题目数据。
+示例 (单选题):
+[
+  {
+    "section": "章节名",
+    "question": "问题内容?",
+    "options": ["选项A", "选项B", "选项C"],
+    "correctAnswer": 0, // 选项A是正确答案
+    "explanation": "这是解析..."
+  }
+]
+示例 (多选题，至少两个正确答案):
+[
+  {
+    "section": "章节名",
+    "question": "问题内容 (多选)?",
+    "options": ["选项A", "选项B", "选项C", "选项D"],
+    "correctAnswers": [0, 2], // 选项A和C是正确答案
+    "explanation": "这是多选题的解析..."
+  }
+]
+AI助手生成的Prompt已改为直接复制到剪贴板。'></textarea>
+                </div>
+                -->
+
+                <div class="quiz-list" id="quizList">
+                    <h4>📋 现有题库</h4>
+                    <div id="quizListContent">
+                        <!-- 题库列表将在这里显示 -->
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="quiz-data-editor">
-            <h4>📝 题目数据</h4>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
-                <p style="font-size: 0.9em; color: var(--text-muted); margin: 0; flex: 1;">
-                    在下方粘贴题目数据（JSON格式），点击"添加题库"时会自动读取
-                </p>
-                <button type="button" id="copyInstructionBtn" style="background: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; cursor: pointer; white-space: nowrap;">
-                    📄 获取AI生成指令
-                </button>
+    <!-- AI上传模态框 -->
+    <div class="modal-overlay" id="aiUploadModal">
+        <div class="modal-content ai-upload-modal">
+            <div class="modal-header">
+                <h3>📥 导入AI生成的题库JSON</h3>
+                <button class="modal-close" id="closeAIModal">×</button>
             </div>
-            <textarea id="quizDataInput" placeholder='点击上方"📄 获取AI生成指令"按钮获取完整的题目生成指令（包含JSON格式示例）'></textarea>
-        </div>
+            <div class="modal-body">
+                <div class="method-tabs">
+                    <button class="tab-btn active" data-method="paste">📋 粘贴数据</button>
+                    <button class="tab-btn" data-method="upload">📁 上传文件</button>
+                </div>
+                
+                <div class="upload-method active" id="pasteMethod">
+                    <div class="method-description">
+                        <p>将AI生成的JSON数据粘贴到下方文本框中：</p>
+                    </div>
+                    <!-- MODIFIED PLACEHOLDER -->
+                    <textarea id="aiJsonInput" placeholder='粘贴AI生成的JSON数据。
+推荐格式 (题库对象，可包含单选题和多选题):
+{
+  "quizzes": [
+    {
+      "subject": "外国艺术史", 
+      "period": "印象派",
+      "name": "印象派综合题库",
+      "description": "关于印象派的题目",
+      "difficulty": "medium",
+      "estimatedTime": "10-15分钟",
+      "questions": [
+        { // 单选题示例
+          "section": "画家",
+          "question": "哪位是印象派的代表画家?",
+          "options": ["梵高", "莫奈", "毕加索"],
+          "correctAnswer": 1,
+          "explanation": "莫奈是印象派的创始人之一。"
+        },
+        { // 多选题示例 (correctAnswers 数组至少包含两个有效索引)
+          "section": "特点",
+          "question": "印象派绘画有哪些主要特点 (多选)?",
+          "options": ["注重光影", "色彩鲜明", "线条精确", "主题写实"],
+          "correctAnswers": [0, 1], 
+          "explanation": "印象派强调捕捉光影的瞬间变化和鲜明的色彩。"
+        }
+      ]
+    }
+  ]
+}
 
-        <div class="quiz-list" id="quizList">
-            <h4>📋 现有题库</h4>
-            <div id="quizListContent">
-                <!-- 题库列表将在这里显示 -->
+如果AI只返回了题目数组 (questions array):
+[ /* 包含单选和多选格式的题目对象... */ ]
+系统将使用您在AI助手表单中选择的学科、时期等信息自动创建题库。
+确保多选题使用 "correctAnswers": [索引数组] 字段，且数组长度>=2。
+单选题使用 "correctAnswer": 索引数字 字段。
+'></textarea>
+                </div>
+                
+                <div class="upload-method" id="uploadMethod">
+                    <div class="method-description">
+                        <p>选择或拖拽AI生成的JSON文件：</p>
+                    </div>
+                    <div class="file-drop-zone" id="fileDropZone">
+                        <div class="drop-zone-content">
+                            <div class="drop-zone-icon">📁</div>
+                            <div class="drop-zone-text">
+                                <p><strong>拖拽JSON文件到此处</strong></p>
+                                <p>或点击选择文件</p>
+                            </div>
+                            <input type="file" id="aiFileInput" accept=".json" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <p>已选择文件: <span id="fileName"></span></p>
+                        <p>文件大小: <span id="fileSize"></span></p>
+                    </div>
+                </div>
+                
+                <div class="ai-import-options">
+                    <h5>📝 导入设置 (当JSON包含多个题库或元数据时)</h5>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>学科覆盖</label>
+                            <select id="importSubjectSelect">
+                                <option value="">优先使用JSON内学科</option>
+                                <option value="western_art">强制 外国艺术史</option>
+                                <option value="chinese_art">强制 中国美术史</option>
+                                <option value="art_theory">强制 艺术概论</option>
+                                <option value="postgraduate_politics">强制 考研政治</option>
+                                <option value="world_knowledge">强制 世界常识</option>
+                            </select>
+                        </div>
+                        <div class="form-col">
+                            <label>冲突处理</label>
+                            <select id="conflictResolution">
+                                <option value="skip">跳过同名题库</option>
+                                <option value="replace">替换同名题库</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="ai-btn secondary" id="cancelImportBtn">取消</button>
+                <button class="ai-btn primary" id="processImportBtn">🚀 开始导入</button>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <header class="header">
-            <h1>学习助手</h1>
-            <p>探索艺术的无穷魅力与世界常识，从经典到现代，开启您的全面学习之旅</p>
-        </header>
-
         <!-- Navigation Breadcrumb -->
         <nav class="breadcrumb" id="breadcrumb">
             <div class="breadcrumb-item current" data-level="home">
@@ -103,9 +445,260 @@
             </div>
         </nav>
 
+        <!-- Main Navigation Menu -->
+        <div class="main-navigation" id="mainNavigation">
+            <button class="nav-tab active" data-tab="subjects">📚 题库</button>
+            <button class="nav-tab" data-tab="review">📝 错题回顾</button>
+            <button class="nav-tab" data-tab="statistics">📊 学习统计</button>
+        </div>
+
+        <!-- Daily Test Button -->
+        <div style="text-align: center; margin-bottom: 30px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <button id="dailyTestBtn" class="start-quiz-btn" style="width: auto; padding: 14px 28px; font-size: 1.05em;">📅 每日一测</button>
+            <!-- 新增 AI 对决按钮 -->
+            <button id="aiDuelBtn" class="start-quiz-btn" style="width: auto; padding: 14px 28px; font-size: 1.05em;">⚔️ AI对决</button>
+            <!-- 新增：打开AI诊断对话框的按钮 -->
+            <!-- 这个按钮现在将打开左侧的AI助手侧边栏，而非独立的Modal -->
+            <!-- <button id="openAiDiagnosticButton" class="start-quiz-btn" style="width: auto; padding: 14px 28px; font-size: 1.05em; background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); color: white; border: none;">�� AI助手</button> -->
+        </div>
+
         <main class="main-content">
-            <div class="cards-grid" id="cardsGrid">
-                <!-- Content will be dynamically generated -->
+            <!-- 题库页面 -->
+            <div class="tab-content active" id="subjectsTab">
+                <div class="cards-grid" id="cardsGrid">
+                    <!-- Content will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- 错题回顾页面 -->
+            <div class="tab-content" id="reviewTab">
+                <div class="review-page">
+                    <div class="review-header">
+                        <h2>📝 错题回顾</h2>
+                        <div class="review-actions">
+                            <button id="startReviewBtn" class="action-btn primary">
+                                🎯 开始练习
+                            </button>
+                            <button id="viewModeBtn" class="action-btn secondary">
+                                👁️ 浏览模式
+                            </button>
+                            <button id="exportIncorrectBtn" class="action-btn secondary">
+                                📤 导出错题
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 筛选面板 -->
+                    <div class="filters-panel" id="reviewFiltersPanel">
+                        <div class="filters-row">
+                            <div class="filter-group">
+                                <label>学科筛选</label>
+                                <select id="reviewSubjectFilter">
+                                    <option value="">所有学科</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>分类筛选</label>
+                                <select id="reviewPeriodFilter">
+                                    <option value="">所有分类</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>标记状态</label>
+                                <select id="reviewMarkedFilter">
+                                    <option value="">全部</option>
+                                    <option value="true">已标记</option>
+                                    <option value="false">未标记</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>掌握程度</label>
+                                <select id="reviewMasteryFilter">
+                                    <option value="">全部</option>
+                                    <option value="0">需加强 (0星)</option>
+                                    <option value="1">较差 (1星)</option>
+                                    <option value="2">一般 (2星)</option>
+                                    <option value="3">良好 (3星及以上)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>排序方式</label>
+                                <select id="reviewSortBy">
+                                    <option value="addedDate">收录时间</option>
+                                    <option value="reviewCount">复习次数</option>
+                                    <option value="masteryLevel">掌握程度</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <button id="clearReviewFilters" class="action-btn clear">
+                                    🔄 清除筛选
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 错题统计 -->
+                    <div class="review-stats" id="incorrectQuestionsCount">
+                        <!-- 统计数据将在这里显示 -->
+                    </div>
+
+                    <!-- 错题列表 -->
+                    <div class="incorrect-questions-list" id="incorrectQuestionsList">
+                        <!-- 错题列表将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 学习统计页面 -->
+            <div class="tab-content" id="statisticsTab">
+                <div class="statistics-page">
+                    <div class="statistics-header">
+                        <h2>📊 学习统计</h2>
+                        <div class="statistics-actions">
+                            <select id="timeRangeSelector" class="time-range-select">
+                                <option value="7d">最近7天</option>
+                                <option value="30d">最近30天</option>
+                                <option value="90d">最近90天</option>
+                                <option value="all">全部时间</option>
+                            </select>
+                            <button id="refreshStatsBtn" class="action-btn secondary">
+                                🔄 刷新
+                            </button>
+                            <button id="exportStatsBtn" class="action-btn secondary">
+                                📥 导出报告
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 概览统计 -->
+                    <div class="overview-section" id="overviewSection">
+                        <div class="stats-overview">
+                            <div class="stat-card">
+                                <div class="stat-icon">📚</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalQuizzes">0</span>
+                                    <span class="stat-label">完成测验数</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">✏️</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalQuestionsAnswered">0</span>
+                                    <span class="stat-label">总回答次数</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">✅</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalCorrectAttempts">0</span>
+                                    <span class="stat-label">累计答对次数</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">❌</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalIncorrectAttempts">0</span>
+                                    <span class="stat-label">累计答错次数</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 整体正确率 -->
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="overallAccuracy">0%</span>
+                                    <span class="stat-label">整体正确率</span>
+                                    <!-- JS中会动态添加解释 -->
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 总题库数 (系统) -->
+                                <div class="stat-icon">🗂️</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalSystemQuizzes">0</span>
+                                    <span class="stat-label">总题库数 (系统)</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 总题目数 (系统) -->
+                                <div class="stat-icon">📜</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalSystemQuestions">0</span>
+                                    <span class="stat-label">总题目数 (系统)</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 已完成题库 (用户) -->
+                                <div class="stat-icon">🏆</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="completedUserQuizzes">0</span>
+                                    <span class="stat-label">已完成题库 (用户)</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 总有效学习时长 -->
+                                <div class="stat-icon">⏳</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="totalEffectiveTime">0秒</span>
+                                    <span class="stat-label">总有效学习时长</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 错题本收录 -->
+                                <div class="stat-icon">📖</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="uniqueIncorrectInBook">0</span>
+                                    <span class="stat-label">错题本收录</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 当前连胜 -->
+                                <div class="stat-icon">🔥</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="studyStreak">0</span>
+                                    <span class="stat-label">当前连胜</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 学习天数 -->
+                                <div class="stat-icon">📅</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="studyDays">0</span>
+                                    <span class="stat-label">学习天数</span>
+                                </div>
+                            </div>
+                            <div class="stat-card"> <!-- 平均用时/题 -->
+                                <div class="stat-icon">⏱️</div>
+                                <div class="stat-content">
+                                    <span class="stat-value" id="averageTime">0秒</span>
+                                    <span class="stat-label">平均用时/题</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 图表区域 -->
+                    <div class="charts-section" id="chartsSection">
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <canvas id="accuracyChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="timeChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="subjectChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="difficultyChart"></canvas>
+                            </div>
+                            <div class="chart-container wide">
+                                <!-- 使用 div 作为日历热力图的容器 -->
+                                <div id="calendarChart" class="calendar-heatmap-wrapper">
+                                    <!-- SVG/Custom HTML 将被插入这里 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 成就展示 -->
+                    <div class="achievements-section" id="achievementsSection">
+                        <div id="achievementsList">
+                            <!-- 成就列表将在这里显示 -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -128,7 +721,7 @@
                     <!-- Single question will be displayed here -->
                 </div>
             </div>
-            
+
             <div class="final-score-container" id="finalScoreContainer">
                 <div id="finalScoreSummary" class="final-score-summary">
                     <!-- Final score will be shown here -->
@@ -159,1575 +752,200 @@
         </div>
     </div>
 
-    <!-- Load JavaScript modules in correct order -->
-    <script>
-        // ===== DATA MODULE =====
-        // 预定义的时期分类选项
-        const periodOptions = {
-            western_art: [
-                { id: 'ancient', name: '古典时期', description: '古希腊罗马艺术' },
-                { id: 'medieval', name: '中世纪', description: '拜占庭与哥特式艺术' },
-                { id: 'renaissance', name: '文艺复兴', description: '15-16世纪欧洲艺术复兴' },
-                { id: 'baroque', name: '巴洛克', description: '17-18世纪巴洛克艺术' },
-                { id: 'neoclassicism', name: '新古典主义', description: '18-19世纪新古典艺术' },
-                { id: 'romanticism', name: '浪漫主义', description: '18-19世纪浪漫主义艺术' },
-                { id: 'impressionism', name: '印象派', description: '19世纪法国印象派艺术运动' },
-                { id: 'post_impressionism', name: '后印象派', description: '19世纪末后印象派艺术' },
-                { id: 'modernism', name: '现代主义', description: '20世纪现代艺术运动' },
-                { id: 'contemporary', name: '当代艺术', description: '20世纪后期至今的艺术' }
-            ],
-            chinese_art: [
-                { id: 'ancient', name: '先秦时期', description: '商周青铜器与早期绘画' },
-                { id: 'han', name: '汉代', description: '汉代艺术与丝绸之路' },
-                { id: 'tang', name: '唐代', description: '盛唐艺术与国际交流' },
-                { id: 'song', name: '宋代', description: '宋代绘画与书法' },
-                { id: 'yuan', name: '元代', description: '元代文人画' },
-                { id: 'ming', name: '明代', description: '明代宫廷与民间艺术' },
-                { id: 'qing', name: '清代', description: '清代艺术与西方影响' },
-                { id: 'modern', name: '近现代', description: '19-20世纪中国艺术变革' },
-                { id: 'contemporary', name: '当代', description: '改革开放以来的中国艺术' }
-            ],
-            art_theory: [
-                { id: 'aesthetics', name: '美学理论', description: '艺术美学基础理论' },
-                { id: 'art_history', name: '艺术史学', description: '艺术史研究方法' },
-                { id: 'criticism', name: '艺术批评', description: '艺术批评理论与实践' },
-                { id: 'psychology', name: '艺术心理学', description: '艺术创作与欣赏心理' },
-                { id: 'sociology', name: '艺术社会学', description: '艺术与社会关系' },
-                { id: 'media', name: '媒介理论', description: '艺术媒介与技术' }
-            ],
-            world_knowledge: [
-                { id: 'liberal_arts', name: '文史哲综合', description: '文学、历史、哲学等人文学科基础常识' },
-                { id: 'law_politics', name: '法政常识', description: '法律法规、政治制度、时事政策等基础知识' },
-                { id: 'science_math', name: '理科综合', description: '数学、物理、化学、生物等自然科学基础' },
-                { id: 'engineering_tech', name: '工科技术', description: '工程技术、计算机科学、信息技术等应用知识' },
-                { id: 'agriculture', name: '农业科学', description: '农业技术、生态环境、食品安全等相关知识' },
-                { id: 'medicine_health', name: '医学健康', description: '基础医学、健康常识、疾病预防等医疗知识' },
-                { id: 'general_culture', name: '文化艺术', description: '文化常识、艺术鉴赏、社会生活等综合知识' },
-                { id: 'geography', name: '地理常识', description: '世界地理、中国地理、自然地理等知识' },
-                { id: 'economics', name: '经济学基础', description: '基础经济学原理、市场经济、金融常识' }
-            ]
-        };
+    <!-- 错题回顾容器 (全屏模式) -->
+    <div class="review-container" id="reviewContainer" style="display: none;">
+        <div class="review-wrapper">
+            <header class="review-header">
+                <button class="review-close-btn" id="reviewCloseBtn">×</button>
+                <h1 id="reviewTitle">错题复习模式</h1>
+                <p id="reviewSubtitle">巩固知识，突破弱点</p>
+            </header>
 
-        // 题库数据存储
-        // 默认的 quizData 结构，确保所有学科都包含在内
-        const defaultInitialQuizData = {
-            "western_art": {
-                id: "western_art",
-                name: "西方艺术史",
-                description: "探索从古至今的西方艺术发展脉络，从古典主义到现代主义的艺术革命",
-                icon: "🎨",
-                periods: {
-                    "impressionism": { // 默认的示例数据
-                        id: "impressionism",
-                        name: "印象派",
-                        description: "19世纪法国印象派艺术运动，光与色彩的革命",
-                        icon: "🌅",
-                        quizzes: [
-                            {
-                                id: "impressionism_beginner",
-                                name: "印象派初级题库",
-                                description: "适合初学者的印象派基础知识测试",
-                                difficulty: "easy",
-                                estimatedTime: "15-20分钟",
-                                questions: [
-                                    {
-                                        section: "引言：定义印象派及其革命性影响",
-                                        question: "印象派的核心主张在于捕捉艺术家对特定场景的什么？",
-                                        options: [
-                                            "对象的精细、客观再现与历史细节",
-                                            "瞬间感官印象，尤其是光线与色彩的变幻",
-                                            "理想化的美学形态与神话叙事",
-                                            "深刻的社会批判与政治寓意"
-                                        ],
-                                        correctAnswer: 1,
-                                        explanation: "印象派的核心主张在于捕捉艺术家对特定场景的瞬间感官印象，而非追求对象的精细、客观再现。其艺术实践的核心在于对光线、色彩以及变幻莫测的瞬间的精妙运用。"
-                                    },
-                                    {
-                                        section: "引言：定义印象派及其革命性影响",
-                                        question: "\"印象派\"这一名称最初源于什么？",
-                                        options: [
-                                            "艺术家们对自己风格的精准定义",
-                                            "艺术评论家路易·勒鲁瓦对莫奈作品的讥讽性评论",
-                                            "法国美术学院对新兴画派的官方命名",
-                                            "观众对画展的普遍正面评价"
-                                        ],
-                                        correctAnswer: 1,
-                                        explanation: "\"印象派\"这一名称源于艺术评论家路易·勒鲁瓦对1874年首届印象派画展的讥讽性评论，特意针对克洛德·莫奈的作品《印象·日出》进行挖苦。"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
-            "chinese_art": {
-                id: "chinese_art",
-                name: "中国美术史",
-                description: "领略博大精深的中华艺术瑰宝，从古代到近现代的艺术传承",
-                icon: "🖌️",
-                periods: {} // 初始为空
-            },
-            "art_theory": {
-                id: "art_theory",
-                name: "艺术概论",
-                description: "艺术的本质、功能与审美理论，建立系统的艺术认知框架",
-                icon: "📚",
-                periods: {} // 初始为空
-            },
-            "world_knowledge": { // 确保 world_knowledge 在默认结构中
-                id: "world_knowledge",
-                name: "世界常识",
-                description: "涵盖文、法、理、工、农、医、艺等各领域的基础常识与核心知识",
-                icon: "🌍",
-                periods: { // 默认的示例数据
-                    "liberal_arts": {
-                        id: "liberal_arts",
-                        name: "文史哲综合",
-                        description: "文学、历史、哲学等人文学科的基础常识",
-                        icon: "📜",
-                        quizzes: []
-                    }
-                }
-            }
-        };
-        
-        // 深拷贝默认数据，避免直接修改 defaultInitialQuizData
-        let quizData = JSON.parse(localStorage.getItem('artQuizData')) || JSON.parse(JSON.stringify(defaultInitialQuizData));
+            <div class="review-progress-container" id="reviewProgressContainer">
+                <div class="review-progress-bar" id="reviewProgressBar">0%</div>
+            </div>
 
+            <div class="review-content-area" id="reviewContentArea">
+                <div id="reviewQuestionArea">
+                    <!-- 复习题目将在这里显示 -->
+                </div>
+            </div>
 
-        // 数据管理器
-        const DataManager = {
-            getData() {
-                return quizData;
-            },
+            <div class="review-navigation-controls" id="reviewNavigationControls">
+                <div class="review-navigation-buttons">
+                    <button id="reviewPrevBtn" class="nav-btn">
+                        ← 上一题
+                    </button>
+                    <button id="reviewSubmitBtn" class="submit-btn-single nav-btn">
+                        提交答案 ✓
+                    </button>
+                    <button id="reviewNextBtn" class="nav-btn">
+                        下一题 →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            saveData() {
-                localStorage.setItem('artQuizData', JSON.stringify(quizData));
-            },
+    <footer>
+        <p>© <span id="currentYear"></span> 学习助手</p>
 
-            getPeriodOptions(subjectId) {
-                return periodOptions[subjectId] || [];
-            },
+        <!-- ****** 新增按钮开始 ****** -->
+        <button id="showAgreementBtn" class="footer-link-btn">用户协议与介绍</button>
+        <!-- ****** 新增按钮结束 ****** -->
 
-            addQuiz(subjectId, periodData, newQuizData) { // changed quizData to newQuizData to avoid conflict
-                const subject = this.getData()[subjectId];
-                if (!subject) {
-                    throw new Error('所选学科不存在');
-                }
+    </footer>
 
-                if (!subject.periods[periodData.id]) {
-                    subject.periods[periodData.id] = {
-                        id: periodData.id,
-                        name: periodData.name,
-                        description: periodData.description,
-                        icon: this.getRandomIcon(),
-                        quizzes: []
-                    };
-                }
+    <!-- 用户协议与介绍模态框 -->
+    <div class="modal-overlay" id="userAgreementModal">
+        <div class="modal-content" id="agreementModalContent" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3>欢迎使用 学习助手</h3>
+            </div>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                
+                <!-- ****** 修改开始：调换顺序 ****** -->
 
-                subject.periods[periodData.id].quizzes.push(newQuizData);
-                this.saveData();
-            },
+                <h4>📜 用户使用协议</h4>
+                <p>在您使用本应用前，请仔细阅读并同意以下条款：</p>
+                <ol>
+                    <li><strong>数据存储与隐私</strong>：本应用的所有数据，包括您创建的题库和学习记录，均存储在您当前使用的浏览器本地存储（IndexedDB或LocalStorage）中。我们作为开发者，不会也无法访问、收集或上传您的任何个人数据。您的数据安全和隐私由您自己掌控。</li>
+                    <li><strong>数据丢失风险</strong>：由于数据存储在本地，当您清除浏览器缓存、更换浏览器或设备时，数据将会丢失。强烈建议您定期使用"管理"面板中的"备份数据"功能，将数据导出到您的本地电脑，以防意外丢失。</li>
+                    <li><strong>API 使用</strong>：本应用的AI相关功能（如AI助手、AI对决）依赖于第三方API服务（如DeepSeek）。这些服务可能产生调用成本，并且有使用限制。我们已为演示设置了合理的体验额度，但不对其服务的持续性、稳定性或响应内容的准确性做任何保证。</li>
+                    <li><strong>内容责任</strong>：您通过本应用创建、导入或生成的任何内容，其责任由您自行承担。请确保内容合法合规。</li>
+                    <li><strong>免责声明</strong>：本应用是一个学习辅助工具，我们尽力确保其功能的稳定性，但不对因使用本应用可能导致的任何直接或间接损失（包括数据丢失）负责。</li>
+                </ol>
+                <p>点击"同意并开始使用"即表示您已阅读、理解并同意上述所有条款。</p>
 
-            deleteQuiz(subjectId, periodId, quizId) {
-                const period = this.getData()[subjectId]?.periods[periodId];
-                if (!period) return false;
+                <hr style="margin: 20px 0;">
 
-                period.quizzes = period.quizzes.filter(quiz => quiz.id !== quizId);
+                <h4>📝 使用介绍</h4>
+                <p>本应用是一个本地化的学习工具，旨在帮助您进行艺术史与世界常识的学习和自测。主要功能包括：</p>
+                <ul>
+                    <li><strong>题库学习</strong>：通过卡片式界面浏览和进行不同章节的测验。</li>
+                    <li><strong>AI 助手</strong>：点击右侧侧边栏的 🧠 按钮，随时与AI进行学情诊断、题目解析等互动。</li>
+                    <li><strong>错题回顾</strong>：所有答错的题目会自动收录到错题本，方便您集中复习。</li>
+                    <li><strong>学习统计</strong>：以图表和数据的形式，直观地展示您的学习进度和成果。</li>
+                    <li><strong>数据管理</strong>：您的所有数据（题库、进度）都保存在您自己的浏览器本地，我们不收集任何个人数据。您可以在管理面板中随时备份和恢复。</li>
+                </ul>
+                
+                <!-- ****** 修改结束 ****** -->
 
-                if (period.quizzes.length === 0) {
-                    delete this.getData()[subjectId].periods[periodId];
-                }
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="action-btn primary" id="agreeAndStartBtn" style="padding: 12px 24px; font-size: 1em;">✅ 同意并开始使用</button>
+            </div>
+        </div>
+    </div>
 
-                this.saveData();
-                return true;
-            },
-
-            getQuiz(subjectId, periodId, quizId) {
-                return this.getData()[subjectId]?.periods[periodId]?.quizzes.find(q => q.id === quizId);
-            },
-
-            getRandomIcon() {
-                const icons = ['🎭', '🖼️', '🏛️', '🌸', '🏺', '📜', '🎪', '🎨', '🖌️', '✨', '💡', '⭐', '🔥', '🌟'];
-                return icons[Math.floor(Math.random() * icons.length)];
-            },
-
-            validateQuizData(data) {
-                try {
-                    if (!data || typeof data !== 'object') return false;
-
-                    for (const [subjectId, subject] of Object.entries(data)) {
-                        if (!subject.id || !subject.name || !subject.periods) return false;
-                        
-                        for (const [periodId, period] of Object.entries(subject.periods)) {
-                            if (!period.id || !period.name || !Array.isArray(period.quizzes)) return false;
-                            
-                            for (const quiz of period.quizzes) {
-                                if (!quiz.id || !quiz.name || !Array.isArray(quiz.questions)) return false;
-                                
-                                for (const question of quiz.questions) {
-                                    if (!question.question || !question.options || 
-                                        !Array.isArray(question.options) || 
-                                        question.options.length !== 4 || // Or check for options.length >= 2 if you allow more/less
-                                        typeof question.correctAnswer !== 'number' ||
-                                        question.correctAnswer < 0 || question.correctAnswer >= question.options.length) { // correctAnswer should be within options bounds
-                                        console.error("Invalid question structure:", question, "in quiz:", quiz.name);
-                                        return false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return true;
-                } catch (error) {
-                    console.error('数据验证错误:', error);
-                    return false;
-                }
-            },
-
-            getDataStatistics(data = null) {
-                const sourceData = data || this.getData();
-                let subjects = 0;
-                let periods = 0;
-                let quizzes = 0;
-                let questions = 0;
-
-                for (const subject of Object.values(sourceData)) {
-                    subjects++;
-                    if (subject.periods && typeof subject.periods === 'object') {
-                        for (const period of Object.values(subject.periods)) {
-                            periods++;
-                            if (period.quizzes && Array.isArray(period.quizzes)) {
-                                for (const quiz of period.quizzes) {
-                                    quizzes++;
-                                    if (quiz.questions && Array.isArray(quiz.questions)) {
-                                        questions += quiz.questions.length;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                return { subjects, periods, quizzes, questions };
-            },
-
-            restoreData(newData) {
-                if (!this.validateQuizData(newData)) {
-                    throw new Error('数据格式验证失败');
-                }
-                quizData = newData; // Directly assign validated new data
-                this.saveData();
-            },
-
-            getBackupData() {
-                const now = new Date();
-                return {
-                    version: "1.0",
-                    exportTime: now.toISOString(),
-                    totalQuizzes: this.getDataStatistics().quizzes,
-                    data: this.getData()
-                };
-            }
-        };
-
-        // 确保数据结构完整 (MODIFIED IIFE)
-        (function initializeData() {
-            let dataWasModified = false;
-            // Use the same defaultInitialQuizData for consistency in structure
-            const defaultStructure = JSON.parse(JSON.stringify(defaultInitialQuizData));
-
-            // 1. 检查并修复顶层学科对象
-            for (const subjectKey in defaultStructure) {
-                if (!quizData.hasOwnProperty(subjectKey) || typeof quizData[subjectKey] !== 'object' || quizData[subjectKey] === null) {
-                    console.warn(`Subject key "${subjectKey}" missing or invalid in loaded quizData. Initializing with default structure.`);
-                    quizData[subjectKey] = JSON.parse(JSON.stringify(defaultStructure[subjectKey]));
-                    dataWasModified = true;
-                } else {
-                    // 确保基本属性存在
-                    if (!quizData[subjectKey].id) { quizData[subjectKey].id = defaultStructure[subjectKey].id; dataWasModified = true; }
-                    if (!quizData[subjectKey].name) { quizData[subjectKey].name = defaultStructure[subjectKey].name; dataWasModified = true; }
-                    if (!quizData[subjectKey].description) { quizData[subjectKey].description = defaultStructure[subjectKey].description; dataWasModified = true; }
-                    if (!quizData[subjectKey].icon) { quizData[subjectKey].icon = defaultStructure[subjectKey].icon; dataWasModified = true; }
-
-                    // 如果学科存在，但缺少 periods 对象，则添加
-                    if (typeof quizData[subjectKey].periods !== 'object' || quizData[subjectKey].periods === null) {
-                        console.warn(`Periods object missing for subject "${subjectKey}". Initializing.`);
-                        quizData[subjectKey].periods = JSON.parse(JSON.stringify(defaultStructure[subjectKey].periods)) || {};
-                        dataWasModified = true;
-                    } else {
-                        // 如果 periods 对象存在，可以进一步检查其中的默认时期
-                        for (const periodKey in defaultStructure[subjectKey].periods) {
-                            if (!quizData[subjectKey].periods.hasOwnProperty(periodKey) || 
-                                typeof quizData[subjectKey].periods[periodKey] !== 'object' ||
-                                quizData[subjectKey].periods[periodKey] === null) {
-                                console.warn(`Default period "${periodKey}" missing in subject "${subjectKey}". Initializing.`);
-                                quizData[subjectKey].periods[periodKey] = JSON.parse(JSON.stringify(defaultStructure[subjectKey].periods[periodKey]));
-                                dataWasModified = true;
-                            } else {
-                                // 确保默认时期的基本属性
-                                const defaultPeriod = defaultStructure[subjectKey].periods[periodKey];
-                                const currentPeriod = quizData[subjectKey].periods[periodKey];
-                                if (!currentPeriod.id) { currentPeriod.id = defaultPeriod.id; dataWasModified = true; }
-                                if (!currentPeriod.name) { currentPeriod.name = defaultPeriod.name; dataWasModified = true; }
-                                if (!currentPeriod.description) { currentPeriod.description = defaultPeriod.description; dataWasModified = true; }
-                                if (!currentPeriod.icon) { currentPeriod.icon = defaultPeriod.icon; dataWasModified = true; }
-                                if (!Array.isArray(currentPeriod.quizzes)) { currentPeriod.quizzes = []; dataWasModified = true; }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (dataWasModified) {
-                console.log("QuizData was modified during initialization to ensure structural integrity. Saving to localStorage.");
-                DataManager.saveData();
-            } else {
-                console.log("QuizData loaded from localStorage is structurally sound or default data used.");
-            }
-        })();
-    </script>
+    <!-- 脚本引入顺序很重要 -->
+    <!-- 核心配置和工具类 -->
+    <script src="js/config.js"></script>
+    <script src="js/data-definitions.js"></script>
+    <script src="js/achievement-definitions.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/markdown-renderer.js"></script>
     
-    <script>
-        // ===== QUIZ ENGINE =====
-        class QuizEngine {
-            constructor() {
-                this.currentQuizData = null;
-                this.currentQuestionIndex = 0;
-                this.userAnswers = [];
-                this.answeredStatus = [];
-                this.score = 0;
-                this.incorrectQuestions = [];
-                this.currentIncorrectReviewIndex = 0;
-                this.quizStartTime = null;
-                this.quizEndTime = null;
-                this.isReviewMode = false;
-                
-                this.initElements();
-                this.setupEventListeners();
-            }
+    <!-- storage-manager 应该在 data-manager 和 progress-manager 使用它之前 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/api-metrics-manager.js"></script>
 
-            initElements() {
-                this.quizContainer = document.getElementById('quizContainer');
-                this.quizTitle = document.getElementById('quizTitle');
-                this.quizSubtitle = document.getElementById('quizSubtitle');
-                this.quizContentArea = document.getElementById('quizContentArea');
-                this.quizArea = document.getElementById('quiz-area');
-                this.finalScoreContainer = document.getElementById('finalScoreContainer');
-                this.finalScoreSummaryDiv = document.getElementById('finalScoreSummary');
-                this.progressBarContainer = document.getElementById('progressBarContainer');
-                this.progressBar = document.getElementById('progressBar');
-                this.prevBtn = document.getElementById('prev-btn');
-                this.nextBtn = document.getElementById('next-btn');
-                this.submitBtn = document.getElementById('submit-btn');
-                this.restartBtn = document.getElementById('restart-btn');
-                this.reviewIncorrectBtn = document.getElementById('review-incorrect-btn');
-                this.navigationControls = document.getElementById('navigationControls');
-                this.quizCloseBtn = document.getElementById('quizCloseBtn');
-            }
+    <!-- AI 相关基础类 -->
+    <script src="js/deepseekApiClient.js"></script>
+    <script src="js/diagnosticStorage.js"></script>
 
-            setupEventListeners() {
-                this.prevBtn.addEventListener('click', () => this.handlePrevious());
-                this.nextBtn.addEventListener('click', () => this.handleNext());
-                this.submitBtn.addEventListener('click', () => this.handleSubmit());
-                this.restartBtn.addEventListener('click', () => this.restart());
-                this.reviewIncorrectBtn.addEventListener('click', () => this.startReviewIncorrect());
-                this.quizCloseBtn.addEventListener('click', () => this.close());
-            }
-
-            start(subjectId, periodId, quizId) {
-                const quiz = DataManager.getQuiz(subjectId, periodId, quizId);
-                if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-                    alert('题库数据错误或为空！');
-                    return;
-                }
-
-                this.currentQuizData = quiz.questions;
-                this.quizTitle.textContent = quiz.name;
-                this.quizSubtitle.textContent = quiz.description;
-
-                this.init();
-                this.show();
-            }
-
-            init() {
-                this.currentQuestionIndex = 0;
-                this.userAnswers = new Array(this.currentQuizData.length).fill(null);
-                this.answeredStatus = new Array(this.currentQuizData.length).fill(false);
-                this.score = 0;
-                this.incorrectQuestions = [];
-                this.isReviewMode = false;
-                this.quizStartTime = new Date();
-                
-                this.quizContentArea.style.display = 'block';
-                this.navigationControls.style.display = 'block';
-                this.progressBarContainer.style.display = 'block';
-                this.finalScoreContainer.style.display = 'none';
-                
-                this.displayQuestion(this.currentQuestionIndex);
-            }
-
-            show() {
-                this.quizContainer.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-
-            close() {
-                this.quizContainer.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                this.reset();
-            }
-
-            reset() {
-                this.currentQuizData = null;
-                this.currentQuestionIndex = 0;
-                this.userAnswers = [];
-                this.answeredStatus = [];
-                this.score = 0;
-                this.incorrectQuestions = [];
-                this.isReviewMode = false;
-            }
-
-            displayQuestion(index, isReview = false) {
-                this.isReviewMode = isReview;
-                const questionData = this.currentQuizData[index];
-                this.quizArea.innerHTML = '';
-
-                const questionBlock = this.createQuestionBlock(questionData, index, isReview);
-                this.quizArea.appendChild(questionBlock);
-                
-                this.updateNavigationButtons();
-                if (!isReview) this.updateProgressBar();
-                
-                this.submitBtn.style.display = isReview ? 'none' : 'inline-flex';
-                if (!isReview) {
-                    this.submitBtn.disabled = this.answeredStatus[index] || this.userAnswers[index] === null;
-                }
-
-                this.quizContentArea.scrollTop = 0;
-            }
-
-            createQuestionBlock(questionData, index, isReview) {
-                const questionBlock = document.createElement('div');
-                questionBlock.classList.add('question-block');
-
-                const questionHeader = document.createElement('div');
-                questionHeader.classList.add('question-header');
-                
-                const sectionTitleDisplay = document.createElement('span');
-                sectionTitleDisplay.classList.add('section-title-display');
-                sectionTitleDisplay.textContent = questionData.section || "综合"; // Default section if not provided
-                questionHeader.appendChild(sectionTitleDisplay);
-
-                const questionNumberDisplay = document.createElement('span');
-                questionNumberDisplay.classList.add('question-number-display');
-                if (isReview) {
-                    questionNumberDisplay.textContent = `错题 ${this.currentIncorrectReviewIndex + 1} / ${this.incorrectQuestions.length}`;
-                } else {
-                    questionNumberDisplay.textContent = `题目 ${index + 1} / ${this.currentQuizData.length}`;
-                }
-                questionHeader.appendChild(questionNumberDisplay);
-                
-                questionBlock.appendChild(questionHeader);
-
-                const questionText = document.createElement('p');
-                questionText.classList.add('question-text');
-                questionText.innerHTML = questionData.question;
-                questionBlock.appendChild(questionText);
-
-                const optionsDiv = this.createOptionsDiv(questionData, index, isReview);
-                questionBlock.appendChild(optionsDiv);
-
-                if ((!isReview && this.answeredStatus[index]) || isReview) {
-                    const explanationDiv = this.createExplanationDiv(questionData, index, isReview);
-                    questionBlock.appendChild(explanationDiv);
-                    this.highlightAnsweredOptions(optionsDiv, index, questionData.correctAnswer);
-                }
-                
-                return questionBlock;
-            }
-
-            createOptionsDiv(questionData, index, isReview) {
-                const optionsDiv = document.createElement('div');
-                optionsDiv.classList.add('options');
-                
-                questionData.options.forEach((option, i) => {
-                    const label = document.createElement('label');
-                    const radio = document.createElement('input');
-                    radio.type = 'radio';
-                    radio.name = `question${index}`;
-                    radio.id = `q${index}_option${i}`;
-                    radio.value = i;
-                    
-                    label.htmlFor = radio.id;
-
-                    const customRadioSpan = document.createElement('span');
-                    customRadioSpan.classList.add('custom-radio');
-
-                    const optionTextSpan = document.createElement('span');
-                    optionTextSpan.classList.add('option-text');
-                    optionTextSpan.textContent = option;
-
-                    if (this.userAnswers[index] === i && !this.answeredStatus[index] && !isReview) {
-                        radio.checked = true;
-                        label.classList.add('selected-option');
-                    }
-                    
-                    radio.disabled = this.answeredStatus[index] || isReview;
-                    if (isReview || this.answeredStatus[index]) {
-                        label.classList.add('answered-option');
-                        if (isReview) label.classList.add('disabled-option');
-                    }
-                    
-                    radio.addEventListener('change', () => {
-                        if (!this.answeredStatus[index] && !isReview) {
-                            this.userAnswers[index] = i;
-                            optionsDiv.querySelectorAll('label').forEach(lbl => lbl.classList.remove('selected-option'));
-                            label.classList.add('selected-option');
-                            this.submitBtn.disabled = false;
-                        }
-                    });
-
-                    label.appendChild(radio);
-                    label.appendChild(customRadioSpan);
-                    label.appendChild(optionTextSpan);
-                    optionsDiv.appendChild(label);
-                });
-                
-                return optionsDiv;
-            }
-
-            createExplanationDiv(questionData, index, isReview) {
-                const explanationDiv = document.createElement('div');
-                explanationDiv.classList.add('explanation');
-                
-                let explanationHTML = `<strong>解析：</strong> ${questionData.explanation || "暂无解析。"}`; // Default explanation
-                
-                if (this.userAnswers[index] === questionData.correctAnswer) {
-                    explanationDiv.classList.add('correct');
-                    if (!isReview) explanationHTML += "<span class='user-answer-indicator'><br><strong>您的选择：</strong> 正确！</span>";
-                    else explanationHTML += `<span class='user-answer-indicator'><br><strong>您的选择：</strong> ${questionData.options[this.userAnswers[index]]} (正确)</span>`;
-                } else {
-                    explanationDiv.classList.add('incorrect');
-                    explanationHTML += `<span class='user-answer-indicator'><br><strong>您的选择：</strong> ${this.userAnswers[index] !== null ? questionData.options[this.userAnswers[index]] : '未选择'} (错误)</span>`;
-                    explanationHTML += `<span class='correct-answer-indicator'><br><strong>正确答案：</strong> ${questionData.options[questionData.correctAnswer]}</span>`;
-                }
-                
-                explanationDiv.innerHTML = explanationHTML;
-                return explanationDiv;
-            }
-
-            highlightAnsweredOptions(optionsDiv, qIndex, correctAnswerIndex) {
-                const radioLabels = optionsDiv.querySelectorAll('label');
-                radioLabels.forEach((label, i) => {
-                    const radioInput = label.querySelector('input[type="radio"]');
-                    radioInput.disabled = true;
-                    label.classList.remove('selected-option');
-                    label.classList.add('answered-option');
-
-                    if (i === correctAnswerIndex) {
-                        label.classList.add('correct-answer-highlight');
-                    }
-                    if (this.userAnswers[qIndex] === i && this.userAnswers[qIndex] !== correctAnswerIndex) {
-                        label.classList.add('incorrect-user-choice');
-                    }
-                });
-            }
-
-            handlePrevious() {
-                if (this.isReviewMode) {
-                    if (this.currentIncorrectReviewIndex > 0) {
-                        this.currentIncorrectReviewIndex--;
-                        this.displayQuestion(this.incorrectQuestions[this.currentIncorrectReviewIndex], true);
-                    }
-                } else {
-                    if (this.currentQuestionIndex > 0) {
-                        this.currentQuestionIndex--;
-                        this.displayQuestion(this.currentQuestionIndex);
-                    }
-                }
-            }
-
-            handleNext() {
-                if (this.isReviewMode) {
-                    if (this.nextBtn.textContent.includes('完成回顾')) {
-                        this.endReview();
-                    } else if (this.currentIncorrectReviewIndex < this.incorrectQuestions.length - 1) {
-                        this.currentIncorrectReviewIndex++;
-                        this.displayQuestion(this.incorrectQuestions[this.currentIncorrectReviewIndex], true);
-                    }
-                } else {
-                    if (this.nextBtn.textContent.includes('查看结果')) {
-                        this.showFinalScore();
-                    } else if (this.currentQuestionIndex < this.currentQuizData.length - 1) {
-                        this.currentQuestionIndex++;
-                        this.displayQuestion(this.currentQuestionIndex);
-                    }
-                }
-            }
-
-            handleSubmit() {
-                if (this.userAnswers[this.currentQuestionIndex] === null && !this.answeredStatus[this.currentQuestionIndex]) {
-                    alert('请选择一个答案后再提交！');
-                    return;
-                }
-                if (this.answeredStatus[this.currentQuestionIndex]) return;
-
-                this.answeredStatus[this.currentQuestionIndex] = true;
-                if (this.userAnswers[this.currentQuestionIndex] === this.currentQuizData[this.currentQuestionIndex].correctAnswer) {
-                    this.score++;
-                } else {
-                    this.incorrectQuestions.push(this.currentQuestionIndex);
-                }
-                this.displayQuestion(this.currentQuestionIndex); // Re-display to show explanation
-                this.updateProgressBar();
-                this.updateNavigationButtons();
-            }
-
-            updateNavigationButtons() {
-                this.prevBtn.innerHTML = this.isReviewMode ? '← 上一错题' : '← 上一题';
-                this.submitBtn.innerHTML = '提交答案 ✓';
-
-                if (this.isReviewMode) {
-                    this.prevBtn.disabled = this.currentIncorrectReviewIndex === 0;
-                    this.nextBtn.disabled = false;
-                    this.nextBtn.innerHTML = (this.currentIncorrectReviewIndex === this.incorrectQuestions.length - 1) ? '完成回顾 🏁' : '下一错题 →';
-                } else {
-                    this.prevBtn.disabled = this.currentQuestionIndex === 0;
-                    if (this.currentQuestionIndex === this.currentQuizData.length - 1) { // Last question
-                        if (this.allQuestionsAnswered()) {
-                            this.nextBtn.innerHTML = '查看结果 🏁';
-                            this.nextBtn.disabled = false;
-                            this.submitBtn.style.display = 'none'; // Hide submit when all answered
-                        } else {
-                            this.nextBtn.innerHTML = '下一题 →';
-                            this.nextBtn.disabled = true; // Disable next if last q and not all answered
-                            this.submitBtn.style.display = this.answeredStatus[this.currentQuestionIndex] ? 'none' : 'inline-flex';
-                        }
-                    } else { // Not the last question
-                        this.nextBtn.innerHTML = '下一题 →';
-                        this.nextBtn.disabled = false; // Enable next for non-last questions
-                        this.submitBtn.style.display = this.answeredStatus[this.currentQuestionIndex] ? 'none' : 'inline-flex';
-                    }
-                    this.submitBtn.disabled = this.answeredStatus[this.currentQuestionIndex] || this.userAnswers[this.currentQuestionIndex] === null;
-                }
-            }
-
-            allQuestionsAnswered() {
-                return this.answeredStatus.every(status => status === true);
-            }
-
-            updateProgressBar() {
-                const answeredCount = this.answeredStatus.filter(status => status === true).length;
-                const progress = this.currentQuizData.length > 0 ? (answeredCount / this.currentQuizData.length) * 100 : 0;
-                this.progressBar.style.width = `${progress}%`;
-                this.progressBar.textContent = `${Math.round(progress)}%`;
-            }
-
-            showFinalScore() {
-                this.quizEndTime = new Date();
-                const timeTaken = this.quizEndTime - this.quizStartTime;
-                const accuracy = this.currentQuizData.length > 0 ? (this.score / this.currentQuizData.length) * 100 : 0;
-
-                this.quizContentArea.style.display = 'none';
-                this.navigationControls.style.display = 'none';
-                this.progressBarContainer.style.display = 'none';
-                
-                this.finalScoreContainer.style.display = 'flex';
-                this.finalScoreSummaryDiv.innerHTML = `
-                    <h3>测试完成！</h3>
-                    <p><span>总题目数：</span> <span>${this.currentQuizData.length}</span></p>
-                    <p><span>答对题数：</span> <span>${this.score}</span></p>
-                    <p><span>答错题数：</span> <span>${this.incorrectQuestions.length}</span></p>
-                    <p class="accuracy"><span>正确率：</span> <span>${accuracy.toFixed(1)}%</span></p>
-                    <p><span>总用时：</span> <span>${this.formatTime(timeTaken)}</span></p>
-                `;
-                this.reviewIncorrectBtn.style.display = this.incorrectQuestions.length > 0 ? 'inline-flex' : 'none';
-            }
-
-            startReviewIncorrect() {
-                if (this.incorrectQuestions.length === 0) return;
-                this.isReviewMode = true;
-                this.currentIncorrectReviewIndex = 0;
-
-                this.quizContentArea.style.display = 'block';
-                this.navigationControls.style.display = 'block';
-                this.finalScoreContainer.style.display = 'none';
-                this.progressBarContainer.style.display = 'none'; // Hide progress bar in review mode
-                this.submitBtn.style.display = 'none'; // Hide submit button in review mode
-
-                this.displayQuestion(this.incorrectQuestions[this.currentIncorrectReviewIndex], true);
-            }
-
-            endReview() {
-                this.isReviewMode = false;
-                this.showFinalScore(); // Go back to score screen
-                // this.submitBtn.style.display = 'inline-flex'; // Not needed if going to score screen
-            }
-
-            restart() {
-                // Re-initialize for a new attempt on the same quiz
-                this.currentQuestionIndex = 0;
-                this.userAnswers.fill(null);
-                this.answeredStatus.fill(false);
-                this.score = 0;
-                this.incorrectQuestions = [];
-                this.isReviewMode = false;
-                this.quizStartTime = new Date();
-                
-                this.quizContentArea.style.display = 'block';
-                this.navigationControls.style.display = 'block';
-                this.progressBarContainer.style.display = 'block';
-                this.finalScoreContainer.style.display = 'none';
-                
-                this.submitBtn.style.display = 'inline-flex'; // Show submit button
-                this.displayQuestion(this.currentQuestionIndex);
-            }
-
-            formatTime(milliseconds) {
-                if (milliseconds < 0) milliseconds = 0;
-                let totalSeconds = Math.floor(milliseconds / 1000);
-                let minutes = Math.floor(totalSeconds / 60);
-                let seconds = totalSeconds % 60;
-                return `${minutes}分 ${seconds.toString().padStart(2, '0')}秒`;
-            }
-        }
-
-        const quizEngine = new QuizEngine();
-    </script>
+    <!-- 核心功能模块 (按大致依赖顺序) -->
+    <!-- data-manager 依赖 config-* 文件 -->
+    <script src="js/data-manager.js"></script>
+    <!-- progress-manager 依赖 data-manager 和 storage-manager -->
+    <script src="js/progress-manager.js"></script>
+    <!-- quiz-engine 依赖 data-manager, progress-manager, AppConfig -->
+    <script src="js/quiz-engine.js"></script>
+    <!-- review-manager 依赖 progress-manager -->
+    <script src="js/review-manager.js"></script>
+    <!-- statistics-manager 依赖 progress-manager, data-manager -->
+    <script src="js/statistics-manager.js"></script>
+    <!-- admin-manager 依赖 data-manager, storage-manager -->
+    <script src="js/admin-manager.js"></script>
+    <!-- ai-duel-manager 依赖 AppConfig -->
+    <script src="js/ai-duel-manager.js"></script>
+    <!-- aiChatManager 依赖 deepseekApiClient, AppConfig -->
+    <script src="js/aiChatManager.js"></script>
     
+    <!-- UI和应用主逻辑 (最后加载) -->
+    <script src="js/ui-manager.js"></script>
+    <script src="js/app.js"></script>
+    <!-- 加载失败时的备用提示 (这个可以保留在最后) -->
     <script>
-        // ===== ADMIN MANAGER =====
-        class AdminManager {
-            constructor() {
-                this.initElements();
-                this.setupEventListeners();
-            }
-
-            initElements() {
-                this.adminToggle = document.getElementById('adminToggle');
-                this.adminPanel = document.getElementById('adminPanel');
-                this.addQuizForm = document.getElementById('addQuizForm');
-                this.subjectSelect = document.getElementById('subjectSelect');
-                this.periodSelect = document.getElementById('periodSelect');
-                this.customPeriodInput = document.getElementById('customPeriodInput');
-                this.quizNameInput = document.getElementById('quizNameInput');
-                this.quizDescInput = document.getElementById('quizDescInput');
-                this.difficultySelect = document.getElementById('difficultySelect');
-                this.estimatedTimeInput = document.getElementById('estimatedTimeInput');
-                this.quizDataInput = document.getElementById('quizDataInput');
-                this.copyInstructionBtn = document.getElementById('copyInstructionBtn');
-                this.backupDataBtn = document.getElementById('backupDataBtn');
-                this.restoreDataBtn = document.getElementById('restoreDataBtn');
-                this.restoreFileInput = document.getElementById('restoreFileInput');
-                this.quizListContent = document.getElementById('quizListContent');
-            }
-
-            setupEventListeners() {
-                this.adminToggle.addEventListener('click', () => this.togglePanel());
-
-                document.addEventListener('click', (e) => {
-                    if (this.adminPanel && !this.adminPanel.contains(e.target) && e.target !== this.adminToggle) {
-                        this.adminPanel.classList.remove('active');
-                    }
-                });
-
-                this.subjectSelect.addEventListener('change', () => this.updatePeriodOptions());
-
-                this.addQuizForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.addNewQuiz();
-                });
-
-                this.copyInstructionBtn.addEventListener('click', () => this.copyInstructionTemplate());
-
-                this.backupDataBtn.addEventListener('click', () => this.backupData());
-                this.restoreDataBtn.addEventListener('click', () => this.restoreFileInput.click());
-                this.restoreFileInput.addEventListener('change', (e) => this.restoreData(e));
-
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.adminPanel && this.adminPanel.classList.contains('active')) {
-                        this.adminPanel.classList.remove('active');
-                    }
-                });
-            }
-
-            togglePanel() {
-                this.adminPanel.classList.toggle('active');
-                if (this.adminPanel.classList.contains('active')) {
-                    this.updateQuizList();
-                    this.updatePeriodOptions(); // Update period options when panel opens, in case subject changed
-                }
-            }
-
-            updatePeriodOptions() {
-                const subjectId = this.subjectSelect.value;
-                this.periodSelect.innerHTML = '<option value="">请选择分类</option>';
+        // 如果3秒后应用还没有初始化完成，显示提示
+        setTimeout(() => {
+            if (!window.app || !window.app.initialized) {
+                console.warn('应用初始化可能遇到问题');
                 
-                if (subjectId) {
-                    const options = DataManager.getPeriodOptions(subjectId);
-                    options.forEach(option => {
-                        const optionElement = document.createElement('option');
-                        optionElement.value = option.id;
-                        optionElement.textContent = option.name;
-                        optionElement.setAttribute('data-description', option.description);
-                        this.periodSelect.appendChild(optionElement);
-                    });
-                    
-                    const customOption = document.createElement('option');
-                    customOption.value = 'custom';
-                    customOption.textContent = '自定义分类...';
-                    this.periodSelect.appendChild(customOption);
-                }
+                // 检查关键依赖
+                const missingDeps = [];
+                if (!window.storageManager) missingDeps.push('存储管理器');
+                if (!window.AppConfig) missingDeps.push('配置文件');
+                if (!window.dataManager) missingDeps.push('数据管理器');
+                if (!window.progressManager) missingDeps.push('进度管理器');
+                if (!window.quizEngine) missingDeps.push('题库引擎');
+                if (!window.reviewManager) missingDeps.push('错题回顾管理器');
+                if (!window.statisticsManager) missingDeps.push('统计管理器');
+                if (!window.adminManager) missingDeps.push('管理面板');
+                if (!window.uiManager) missingDeps.push('界面管理器');
+                if (!window.aiChatManager) missingDeps.push('AI聊天管理器');
                 
-                this.customPeriodInput.style.display = 'none';
-                this.customPeriodInput.required = false; // Ensure it's not required by default
-                
-                this.periodSelect.onchange = () => {
-                    if (this.periodSelect.value === 'custom') {
-                        this.customPeriodInput.style.display = 'block';
-                        this.customPeriodInput.required = true;
-                        this.customPeriodInput.focus();
-                    } else {
-                        this.customPeriodInput.style.display = 'none';
-                        this.customPeriodInput.required = false;
-                        this.customPeriodInput.value = '';
-                    }
-                };
-                 // Trigger onchange if a period is already selected (e.g., during edit)
-                if (this.periodSelect.value === 'custom') {
-                    this.customPeriodInput.style.display = 'block';
-                    this.customPeriodInput.required = true;
-                }
-            }
-
-            addNewQuiz() {
-                const subjectId = this.subjectSelect.value;
-                let periodId = this.periodSelect.value; // Use let as it might be reassigned
-                const customPeriodName = this.customPeriodInput.value.trim();
-                const quizName = this.quizNameInput.value.trim();
-                const quizDesc = this.quizDescInput.value.trim();
-                const difficulty = this.difficultySelect.value;
-                const estimatedTime = this.estimatedTimeInput.value.trim();
-                const questionsDataText = this.quizDataInput.value.trim();
-
-                if (!subjectId) { alert('请选择学科！'); return; }
-                if (periodId === 'custom' && !customPeriodName) { alert('请输入自定义分类名称！'); return; }
-                if (!periodId && !customPeriodName) { alert('请选择或输入时期分类！'); return; }
-                if (!quizName) { alert('请输入题库名称！'); return; }
-                if (!questionsDataText) { alert('请输入题目数据！'); return; }
-
-
-                let questions;
-                try {
-                    questions = JSON.parse(questionsDataText);
-                    if (!Array.isArray(questions) || questions.length === 0) {
-                        throw new Error('题目数据必须是非空数组');
-                    }
-                    // Basic validation for each question
-                    for(const q of questions) {
-                        if (!q.question || !Array.isArray(q.options) || q.options.length === 0 || typeof q.correctAnswer !== 'number' || !q.explanation) {
-                            throw new Error('题目数据结构不完整 (缺少 question, options, correctAnswer, 或 explanation)');
-                        }
-                        if (q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
-                             throw new Error(`题 "${q.question.substring(0,20)}..." 的 correctAnswer 超出选项范围。`);
-                        }
-                    }
-                } catch (error) {
-                    alert('题目数据格式错误或内容不完整，请检查JSON格式及必填字段！\n错误：' + error.message);
-                    return;
-                }
-
-                let finalPeriodId, finalPeriodName, finalPeriodDescription;
-                
-                if (periodId === 'custom' || !periodId) { // Handles both 'custom' and if periodSelect is empty
-                    finalPeriodName = customPeriodName;
-                    finalPeriodId = finalPeriodName.toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яА-ЯёЁ]/g, '') || `custom_${Date.now()}`; // Added Russian chars and fallback
-                    finalPeriodDescription = `${finalPeriodName}相关的知识与题库`;
-                } else {
-                    const periodOptionsList = DataManager.getPeriodOptions(subjectId); // Renamed to avoid conflict
-                    const selectedPeriod = periodOptionsList.find(p => p.id === periodId);
-                    if (selectedPeriod) {
-                        finalPeriodId = selectedPeriod.id;
-                        finalPeriodName = selectedPeriod.name;
-                        finalPeriodDescription = selectedPeriod.description;
-                    } else {
-                        // This case should ideally not happen if periodSelect is populated correctly
-                        // but as a fallback, treat as custom if selectedPeriod is not found
-                        console.warn(`Selected period ID "${periodId}" not found in options. Treating as custom.`);
-                        finalPeriodName = periodId; // Or some other fallback
-                        finalPeriodId = periodId.toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яА-ЯёЁ]/g, '');
-                        finalPeriodDescription = `${finalPeriodName}相关的知识与题库`;
-                        // alert('所选时期分类不存在！'); return;
-                    }
-                }
-
-                const quizId = quizName.toLowerCase().replace(/\s+/g, '_').replace(/[^\wа-яА-ЯёЁ]/g, '') + '_' + Date.now();
-
-                try {
-                    const periodPayload = { // Renamed from periodData
-                        id: finalPeriodId,
-                        name: finalPeriodName,
-                        description: finalPeriodDescription
-                    };
-
-                    const newQuiz = {
-                        id: quizId,
-                        name: quizName,
-                        description: quizDesc || `${quizName}的详细内容`,
-                        difficulty: difficulty,
-                        estimatedTime: estimatedTime || "未知", // Default estimated time
-                        questions: questions
-                    };
-
-                    DataManager.addQuiz(subjectId, periodPayload, newQuiz);
-
-                    this.addQuizForm.reset();
-                    this.quizDataInput.value = '';
-                    this.subjectSelect.value = ""; // Reset subject select
-                    this.periodSelect.innerHTML = '<option value="">请先选择学科</option>';
-                    this.customPeriodInput.style.display = 'none';
-                    this.customPeriodInput.value = '';
-                    this.customPeriodInput.required = false;
-
-
-                    this.updateQuizList();
-                    
-                    if (window.uiManager) {
-                        window.uiManager.refreshCurrentPage();
-                    }
-
-                    alert('题库添加成功！');
-
-                } catch (error) {
-                    console.error("Error adding quiz:", error);
-                    alert('添加题库失败：' + error.message);
-                }
-            }
-
-            deleteQuiz(subjectId, periodId, quizId) {
-                if (!confirm('确定要删除这个题库吗？此操作不可恢复。')) return;
-
-                if (DataManager.deleteQuiz(subjectId, periodId, quizId)) {
-                    this.updateQuizList();
-                    if (window.uiManager) {
-                        window.uiManager.refreshCurrentPage();
-                    }
-                    alert('题库已删除。');
-                } else {
-                    alert('删除失败，题库可能不存在。');
-                }
-            }
-
-            editQuiz(subjectId, periodId, quizId) {
-                const quiz = DataManager.getQuiz(subjectId, periodId, quizId);
-                if (!quiz) {
-                    alert('无法编辑：未找到题库。');
-                    return;
-                }
-
-                const allQuizData = DataManager.getData(); // Renamed from quizData
-                const period = allQuizData[subjectId]?.periods[periodId];
-
-                if (!period) {
-                     alert('无法编辑：未找到时期分类。');
-                     return;
-                }
-
-                this.subjectSelect.value = subjectId;
-                this.updatePeriodOptions(); // This will repopulate periodSelect
-                
-                // Use setTimeout to allow periodSelect to repopulate before setting its value
-                setTimeout(() => {
-                    // Attempt to find the periodId in the newly populated options
-                    const periodOptionExists = Array.from(this.periodSelect.options).some(option => option.value === periodId);
-
-                    if (periodOptionExists) {
-                        this.periodSelect.value = periodId;
-                        this.customPeriodInput.style.display = 'none';
-                        this.customPeriodInput.required = false;
-                        this.customPeriodInput.value = '';
-                    } else {
-                        // If periodId is not a standard option, it must be custom
-                        this.periodSelect.value = 'custom';
-                        this.customPeriodInput.style.display = 'block';
-                        this.customPeriodInput.value = period.name; // Populate with the period's name
-                        this.customPeriodInput.required = true;
-                    }
-                    
-                    this.quizNameInput.value = quiz.name;
-                    this.quizDescInput.value = quiz.description || '';
-                    this.difficultySelect.value = quiz.difficulty;
-                    this.estimatedTimeInput.value = quiz.estimatedTime || '';
-                    this.quizDataInput.value = JSON.stringify(quiz.questions, null, 2);
-                }, 100); // 100ms delay, adjust if needed
-
-                // It's better to update the quiz rather than delete and re-add immediately.
-                // For simplicity of this example, we'll delete it first.
-                // A more robust approach would be to have an "Update Quiz" button
-                // that calls a DataManager.updateQuiz method.
-                if (confirm('将填充表单以编辑此题库。编辑完成后，您需要重新提交以保存更改。\n注意：为简化操作，原题库将先被删除。请确认是否继续？')) {
-                    DataManager.deleteQuiz(subjectId, periodId, quizId); // Delete the old one
-                    this.updateQuizList(); // Update list to reflect deletion
-                    if (window.uiManager) {
-                        window.uiManager.refreshCurrentPage();
-                    }
-                    this.adminPanel.classList.add('active'); // Ensure panel is open
-                    this.quizNameInput.focus(); // Focus on a field
-                } else {
-                    // If user cancels, revert any premature changes or do nothing
-                    this.subjectSelect.value = ""; // Reset form if edit is cancelled
-                    this.periodSelect.innerHTML = '<option value="">请先选择学科</option>';
-                    this.addQuizForm.reset();
-                    this.quizDataInput.value = "";
-                }
-            }
-
-            updateQuizList() {
-                const allQuizData = DataManager.getData(); // Renamed
-                let listHTML = '';
-                let quizCount = 0;
-                
-                Object.values(allQuizData).forEach(subject => {
-                    if (subject && subject.periods && typeof subject.periods === 'object') {
-                        Object.values(subject.periods).forEach(period => {
-                            if (period && period.quizzes && Array.isArray(period.quizzes)) {
-                                period.quizzes.forEach(quiz => {
-                                    quizCount++;
-                                    listHTML += `
-                                        <div class="quiz-item">
-                                            <div>
-                                                <strong>${quiz.name}</strong><br>
-                                                <small>${subject.name} - ${period.name} (${quiz.questions?.length || 0}题)</small>
-                                            </div>
-                                            <div>
-                                                <button class="edit-btn" onclick="adminManager.editQuiz('${subject.id}', '${period.id}', '${quiz.id}')">
-                                                    编辑
-                                                </button>
-                                                <button class="delete-btn" onclick="adminManager.deleteQuiz('${subject.id}', '${period.id}', '${quiz.id}')">
-                                                    删除
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                                });
-                            }
-                        });
-                    }
-                });
-                this.quizListContent.innerHTML = quizCount > 0 ? listHTML : '<p style="text-align:center;color:var(--text-muted);">暂无题库</p>';
-            }
-
-            copyInstructionTemplate() {
-                const instruction = `📝 题目生成任务指令
-
-请根据我提供的学习资料，生成选择题题库，格式必须严格按照以下JSON模板：
-
-\`\`\`json
-[
-  {
-    "section": "章节或主题名称 (例如：印象派的起源)",
-    "question": "题目内容 (例如：印象派运动始于哪个国家？)",
-    "options": [
-      "选项A的完整内容 (例如：法国)",
-      "选项B的完整内容 (例如：意大利)", 
-      "选项C的完整内容 (例如：西班牙)",
-      "选项D的完整内容 (例如：英国)"
-    ],
-    "correctAnswer": 0,
-    "explanation": "详细的解析，说明为什么这个答案是正确的 (例如：印象派是19世纪下半叶在法国兴起的一场重要的艺术运动...)"
-  }
-  // ...更多题目对象
-]
-\`\`\`
-
-📋 格式要求：
-1. **顶级是JSON数组**: \`[\` 开头, \`]\` 结尾。
-2. **每个题目是一个JSON对象**: \`{\` ... \`}\`。
-3. **section字段 (字符串)**: 题目所属的章节、主题或知识点分类。务必具体明确。
-4. **question字段 (字符串)**: 题目的完整描述。必须清晰、准确，避免歧义。
-5. **options数组 (字符串数组)**: 必须包含4个字符串选项。内容要完整，不要只写"选项A"。
-6. **correctAnswer字段 (数字)**: 正确答案在options数组中的索引。0代表第一个选项，1代表第二个，以此类推 (0, 1, 2, 或 3)。
-7. **explanation字段 (字符串)**: 对正确答案的详细解析。要解释清楚原理、背景知识点，帮助学习者理解。
-
-🎯 题目质量要求：
-- **相关性**: 题目必须与提供的学习资料紧密相关。
-- **准确性**: 题目、选项和答案必须准确无误。
-- **清晰度**: 问题和选项的表述应清晰易懂。
-- **干扰性**: 错误选项应具有合理的迷惑性，避免答案过于明显或无关。
-- **覆盖面**: 尽可能全面地覆盖学习资料中的重要知识点。
-- **解析质量**: 解析应具有教育意义，不仅仅是重复答案。
-- **数量**: 根据资料内容，建议生成10-30道题目为宜。
-
-🌟 适用范围：
-- 艺术史类：西方艺术史、中国美术史、艺术概论
-- 世界常识类：文史哲、法政、理科、工科、农业、医学、文化艺术等各领域基础知识
-
-请严格按照以上格式和要求，根据我接下来提供的学习资料生成高质量的题库JSON数据。
-
----
-
-我的学习资料：
-[请在此处粘贴您的学习资料]`;
-
-                navigator.clipboard.writeText(instruction).then(() => {
-                    const originalText = this.copyInstructionBtn.textContent;
-                    this.copyInstructionBtn.textContent = '✅ 已复制！';
-                    this.copyInstructionBtn.style.background = '#48bb78'; // Green for success
-                    setTimeout(() => {
-                        this.copyInstructionBtn.textContent = originalText;
-                        this.copyInstructionBtn.style.background = '#3182ce'; // Original blue
-                    }, 2000);
-                }).catch(err => {
-                    console.error('无法自动复制: ', err);
-                    alert('自动复制失败，请手动复制以下指令：\n\n' + instruction);
-                });
-            }
-
-            backupData() {
-                try {
-                    const backupData = DataManager.getBackupData();
-                    
-                    const now = new Date();
-                    const timestamp = now.toISOString().slice(0, 19).replace(/[T:]/g, '_'); // YYYY-MM-DD_HH_MM_SS
-                    const filename = `学习助手题库备份_${timestamp}.json`;
-
-                    const dataStr = JSON.stringify(backupData, null, 2); // Pretty print JSON
-                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                    const url = URL.createObjectURL(dataBlob);
-
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = url;
-                    downloadLink.download = filename;
-                    downloadLink.style.display = 'none'; // Hidden link
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click(); // Trigger download
-                    document.body.removeChild(downloadLink); // Clean up
-
-                    setTimeout(() => URL.revokeObjectURL(url), 100); // Release object URL
-
-                    const originalText = this.backupDataBtn.textContent;
-                    this.backupDataBtn.textContent = '✅ 备份成功！';
-                    this.backupDataBtn.style.background = '#48bb78';
-                    setTimeout(() => {
-                        this.backupDataBtn.textContent = originalText;
-                        this.backupDataBtn.style.background = '#805ad5'; // Original purple
-                    }, 2000);
-                    console.log('数据备份成功:', filename);
-                } catch (error) {
-                    console.error('备份失败:', error);
-                    alert('数据备份失败，请重试！\n错误：' + error.message);
-                }
-            }
-
-            restoreData(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                if (!file.name.toLowerCase().endsWith('.json')) {
-                    alert('请选择JSON格式的备份文件！');
-                    this.restoreFileInput.value = ''; // Reset file input
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const jsonData = JSON.parse(e.target.result);
-                        
-                        let dataToRestore;
-                        // Check for our backup structure or a raw data structure
-                        if (jsonData && jsonData.data && jsonData.version) { // Our backup structure
-                            dataToRestore = jsonData.data;
-                        } else if (jsonData && (jsonData.western_art || jsonData.world_knowledge)) { // Raw data structure
-                            dataToRestore = jsonData;
-                        } else {
-                            throw new Error('文件格式不正确，无法识别为有效的题库数据或备份文件。');
-                        }
-
-                        // Validate the data structure before attempting to restore
-                        if (!DataManager.validateQuizData(dataToRestore)) {
-                            throw new Error('备份文件中的数据结构验证失败，无法恢复。请确保文件内容符合预期的题库格式。');
-                        }
-                        
-                        const currentQuizData = DataManager.getData(); // Renamed
-                        const statsBefore = DataManager.getDataStatistics(currentQuizData);
-                        const hasExistingData = statsBefore.quizzes > 0;
-
-                        let shouldProceed = true;
-                        if (hasExistingData) {
-                            shouldProceed = confirm(
-                                '检测到现有题库数据。\n\n选择"确定"将用备份文件中的数据【完全替换】现有所有数据。\n选择"取消"将中止恢复操作。\n\n强烈建议在执行此操作前先备份当前数据！'
-                            );
-                        }
-
-                        if (!shouldProceed) {
-                            this.restoreFileInput.value = '';
-                            return;
-                        }
-
-                        DataManager.restoreData(dataToRestore); // This now directly assigns and saves
-
-                        this.updateQuizList();
-                        if (window.uiManager) {
-                            window.uiManager.init(); // Re-initialize UI to reflect new data from home
-                        }
-
-                        const originalText = this.restoreDataBtn.textContent;
-                        this.restoreDataBtn.textContent = '✅ 恢复成功！';
-                        this.restoreDataBtn.style.background = '#48bb78';
-                        setTimeout(() => {
-                            this.restoreDataBtn.textContent = originalText;
-                            this.restoreDataBtn.style.background = '#38a169'; // Original green
-                        }, 2000);
-
-                        const statsAfter = DataManager.getDataStatistics();
-                        alert(`数据恢复成功！\n\n📊 恢复统计：\n• 学科数量：${statsAfter.subjects}\n• 分类数量：${statsAfter.periods}\n• 题库数量：${statsAfter.quizzes}\n• 题目总数：${statsAfter.questions}`);
-                        console.log('数据恢复成功:', statsAfter);
-
-                    } catch (error) {
-                        console.error('数据恢复失败:', error);
-                        alert('数据恢复失败！\n\n可能的原因：\n• 文件不是有效的JSON格式。\n• 文件内容不符合题库数据结构。\n• 文件已损坏。\n\n错误详情：' + error.message);
-                    }
-                    this.restoreFileInput.value = ''; // Reset file input in all cases
-                };
-
-                reader.onerror = () => {
-                    alert('文件读取失败，请重试！');
-                    this.restoreFileInput.value = '';
-                };
-                reader.readAsText(file);
-            }
-        }
-
-        const adminManager = new AdminManager();
-    </script>
-    
-    <script>
-        // ===== UI MANAGER =====
-        class UIManager {
-            constructor() {
-                this.currentState = {
-                    level: 'home',
-                    subject: null,
-                    period: null,
-                    quiz: null
-                };
-                
-                this.initElements();
-                this.setupEventListeners();
-            }
-
-            initElements() {
-                this.breadcrumb = document.getElementById('breadcrumb');
-                this.cardsGrid = document.getElementById('cardsGrid');
-            }
-
-            setupEventListeners() {
-                this.breadcrumb.addEventListener('click', (e) => {
-                    const item = e.target.closest('.breadcrumb-item');
-                    if (!item || item.classList.contains('current')) return;
-                    
-                    const level = item.dataset.level;
-                    this.navigateToLevel(level, item.dataset);
-                });
-            }
-
-            navigateToLevel(level, data = {}) {
-                switch (level) {
-                    case 'home':
-                        this.currentState = { level: 'home', subject: null, period: null, quiz: null };
-                        this.showHomePage();
-                        break;
-                    case 'subject':
-                        this.currentState = { level: 'subject', subject: data.subject, period: null, quiz: null };
-                        this.showSubjectPage(data.subject);
-                        break;
-                    case 'period':
-                        this.currentState = { level: 'period', subject: data.subject, period: data.period, quiz: null };
-                        this.showPeriodPage(data.subject, data.period);
-                        break;
-                }
-                this.updateBreadcrumb();
-            }
-
-            showHomePage() {
-                const allQuizData = DataManager.getData(); // Renamed
-                const subjects = Object.values(allQuizData).filter(subject => 
-                    subject && subject.periods && Object.keys(subject.periods).length > 0
-                );
-                
-                this.cardsGrid.innerHTML = subjects.map(subject => {
-                    const totalQuizzes = Object.values(subject.periods).reduce((sum, period) => sum + (period.quizzes ? period.quizzes.length : 0), 0);
-                    return `
-                        <div class="card" onclick="uiManager.navigateToSubject('${subject.id}')">
-                            <div class="card-icon">${subject.icon || '📚'}</div>
-                            <h3>${subject.name}</h3>
-                            <p>${subject.description}</p>
-                            <div class="card-meta">
-                                <span>${Object.keys(subject.periods).length} 个分类</span>
-                                <span>${totalQuizzes} 个题库</span>
-                            </div>
-                        </div>
+                if (missingDeps.length > 0) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = `
+                        position: fixed; 
+                        top: 10px; 
+                        right: 10px; 
+                        background: #ffeb3b; 
+                        color: #333; 
+                        padding: 15px; 
+                        border-radius: 8px; 
+                        font-family: sans-serif; 
+                        font-size: 14px; 
+                        z-index: 10000;
+                        max-width: 300px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                     `;
-                }).join('') || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;"><h3>暂无题库</h3><p>点击右上角⚙️按钮添加您的第一个题库吧！</p></div>';
-            }
-
-            showSubjectPage(subjectId) {
-                const allQuizData = DataManager.getData(); // Renamed
-                const subject = allQuizData[subjectId];
-                if (!subject) {
-                    console.error(`Subject with ID "${subjectId}" not found.`);
-                    this.navigateToLevel('home');
-                    return;
-                }
-
-                const periods = subject.periods ? Object.values(subject.periods) : [];
-                
-                this.cardsGrid.innerHTML = periods.map(period => `
-                    <div class="card" onclick="uiManager.navigateToPeriod('${subjectId}', '${period.id}')">
-                        <div class="card-icon">${period.icon || '📂'}</div>
-                        <h3>${period.name}</h3>
-                        <p>${period.description}</p>
-                        <div class="card-meta">
-                            <span>${period.quizzes?.length || 0} 个题库</span>
-                            <span>→</span>
-                        </div>
-                    </div>
-                `).join('') || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;"><h3>该学科下暂无分类或题库</h3><p>点击右上角⚙️按钮添加题库！</p></div>';
-            }
-
-            showPeriodPage(subjectId, periodId) {
-                const allQuizData = DataManager.getData(); // Renamed
-                const period = allQuizData[subjectId]?.periods[periodId];
-                if (!period) {
-                    console.error(`Period with ID "${periodId}" in subject "${subjectId}" not found.`);
-                    this.navigateToLevel('subject', { subject: subjectId });
-                    return;
-                }
-
-                const quizzes = period.quizzes || [];
-                this.cardsGrid.innerHTML = quizzes.map(quiz => `
-                    <div class="card">
-                        <div class.card-icon">${this.getDifficultyIcon(quiz.difficulty)}</div>
-                        <h3>${quiz.name}</h3>
-                        <p>${quiz.description}</p>
-                        <div class="card-meta">
-                            <span class="difficulty-badge difficulty-${quiz.difficulty || 'unknown'}">
-                                ${this.getDifficultyText(quiz.difficulty)}
-                            </span>
-                            <span>${quiz.questions?.length || 0} 题</span>
-                        </div>
-                        <div style="margin-top: 20px;">
-                            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
-                                预计用时: ${quiz.estimatedTime || "未知"}
-                            </div>
-                            <button class="start-quiz-btn" onclick="uiManager.startQuiz('${subjectId}', '${periodId}', '${quiz.id}')">
-                                <span>开始测试</span>
-                                <span>▶</span>
-                            </button>
-                        </div>
-                    </div>
-                `).join('') || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;"><h3>该分类下暂无题库</h3><p>点击右上角⚙️按钮添加题库！</p></div>';
-            }
-
-            updateBreadcrumb() {
-                let items = [
-                    { level: 'home', text: '🏠 首页', data: {} }
-                ];
-                const allQuizData = DataManager.getData(); // Renamed
-
-                if (this.currentState.subject) {
-                    const subject = allQuizData[this.currentState.subject];
-                    if (subject) {
-                        items.push({
-                            level: 'subject',
-                            text: `${subject.icon || '📚'} ${subject.name}`,
-                            data: { subject: this.currentState.subject }
-                        });
-                    }
-                }
-
-                if (this.currentState.period) {
-                    const period = allQuizData[this.currentState.subject]?.periods[this.currentState.period];
-                    if (period) {
-                        items.push({
-                            level: 'period',
-                            text: `${period.icon || '📂'} ${period.name}`,
-                            data: { subject: this.currentState.subject, period: this.currentState.period }
-                        });
-                    }
-                }
-
-                this.breadcrumb.innerHTML = items.map((item, index) => {
-                    const isLast = index === items.length - 1;
-                    const isCurrent = isLast;
-                    
-                    let dataAttrs = '';
-                    for (const key in item.data) {
-                        if (item.data.hasOwnProperty(key) && item.data[key] !== null && item.data[key] !== undefined) {
-                            dataAttrs += `data-${key}="${item.data[key]}" `;
-                        }
-                    }
-
-                    return `
-                        <div class="breadcrumb-item ${isCurrent ? 'current' : ''}" 
-                             data-level="${item.level}" 
-                             ${dataAttrs.trim()}>
-                            ${item.text}
-                        </div>
-                        ${!isLast ? '<span class="breadcrumb-separator">›</span>' : ''}
+                    errorDiv.innerHTML = `
+                        <strong>⚠️ 加载提示</strong><br>
+                        以下模块可能未正确加载：<br>
+                        ${missingDeps.map(dep => `• ${dep}`).join('<br>')}
+                        <br><br>
+                        <small>请检查文件路径或刷新页面重试</small>
                     `;
-                }).join('');
-            }
-
-            refreshCurrentPage() {
-                // const allQuizData = DataManager.getData(); // Renamed - not strictly needed here if methods handle it
-                
-                if (this.currentState.level === 'period' && this.currentState.subject && this.currentState.period) {
-                    // Check if data still exists before trying to show
-                    const periodExists = DataManager.getData()[this.currentState.subject]?.periods[this.currentState.period];
-                    if (periodExists) {
-                        this.showPeriodPage(this.currentState.subject, this.currentState.period);
-                    } else {
-                        this.navigateToLevel('subject', { subject: this.currentState.subject });
-                    }
-                } else if (this.currentState.level === 'subject' && this.currentState.subject) {
-                    const subjectExists = DataManager.getData()[this.currentState.subject];
-                    if (subjectExists) {
-                        this.showSubjectPage(this.currentState.subject);
-                    } else {
-                        this.navigateToLevel('home');
-                    }
-                } else if (this.currentState.level === 'home') {
-                    this.showHomePage();
+                    document.body.appendChild(errorDiv);
+                    
+                    // 5秒后自动隐藏提示
+                    setTimeout(() => {
+                        errorDiv.style.display = 'none';
+                    }, 5000);
                 }
-                this.updateBreadcrumb(); // Ensure breadcrumb is also updated
             }
-
-            navigateToSubject(subjectId) {
-                this.navigateToLevel('subject', { subject: subjectId });
-            }
-
-            navigateToPeriod(subjectId, periodId) {
-                this.navigateToLevel('period', { subject: subjectId, period: periodId });
-            }
-
-            startQuiz(subjectId, periodId, quizId) {
-                quizEngine.start(subjectId, periodId, quizId);
-            }
-
-            getDifficultyIcon(difficulty) {
-                const icons = {
-                    easy: '🟢',
-                    medium: '🟡',
-                    hard: '🔴'
-                };
-                return icons[difficulty] || '⚪'; // Default for unknown
-            }
-
-            getDifficultyText(difficulty) {
-                const texts = {
-                    easy: '初级',
-                    medium: '中级',
-                    hard: '高级'
-                };
-                return texts[difficulty] || '未知'; // Default for unknown
-            }
-
-            init() {
-                this.navigateToLevel('home'); // Start from home, which will call showHomePage and updateBreadcrumb
-            }
-        }
-
-        const uiManager = new UIManager();
-        window.uiManager = uiManager; // Expose to global for HTML onclick
-        
-        // ===== APP INIT =====
-        function initApp() {
-            try {
-                // DataManager is already initialized via its IIFE
-                uiManager.init(); // Initialize UI, which depends on DataManager
-                // AdminManager is already initialized
-                // QuizEngine is already initialized
-                
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        if (quizEngine.quizContainer && quizEngine.quizContainer.style.display !== 'none') {
-                            quizEngine.close();
-                        }
-                        if (adminManager.adminPanel && adminManager.adminPanel.classList.contains('active')) {
-                            adminManager.adminPanel.classList.remove('active');
-                        }
-                    }
-                });
-
-                window.addEventListener('beforeunload', (e) => {
-                    if (quizEngine.currentQuizData && quizEngine.currentQuestionIndex > 0 && !quizEngine.isReviewMode && quizEngine.finalScoreContainer.style.display === 'none') {
-                        e.preventDefault();
-                        e.returnValue = '您正在进行测试，确定要离开吗？您的进度将不会被保存。';
-                        return e.returnValue;
-                    }
-                });
-
-                console.log('学习助手应用初始化完成');
-                
-            } catch (error) {
-                console.error('应用初始化失败:', error);
-                // Simple alert for critical init errors, or use a more sophisticated error display
-                const errorDiv = document.createElement('div');
-                errorDiv.textContent = '应用初始化失败，请刷新页面重试。错误: ' + error.message;
-                errorDiv.style.cssText = "position:fixed;top:10px;left:10px;background:red;color:white;padding:10px;z-index:10000;";
-                document.body.prepend(errorDiv);
-            }
-        }
-
-        // Start the application
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp(); // DOMContentLoaded has already fired
-        }
-
-        // Global utility/debug functions
-        window.app = {
-            info: () => ({
-                name: '学习助手',
-                version: '2.1.0 (修复版)',
-                description: '艺术史与世界常识题库系统'
-            }),
-            restart: () => {
-                if (confirm('确定要重启应用吗？未保存的更改将丢失。')) {
-                    location.reload();
-                }
-            },
-            clearAllData: () => {
-                if (confirm('警告：确定要清除所有题库数据吗？此操作不可恢复！')) {
-                    localStorage.removeItem('artQuizData');
-                    alert('所有数据已清除。应用将刷新。');
-                    location.reload();
-                }
-            },
-            getStats: () => DataManager.getDataStatistics(),
-            exportData: () => {
-                const dataStr = JSON.stringify(DataManager.getData(), null, 2);
-                const dataBlob = new Blob([dataStr], {type : 'application/json'});
-                const url = URL.createObjectURL(dataBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'quizData_export.json';
-                a.click();
-                URL.revokeObjectURL(url);
-                console.log("数据已导出为 quizData_export.json");
-            }
-        };
-
-        // Log debug info in development
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.log('🎯 学习助手应用 - 开发模式');
-            console.log('📊 应用信息:', window.app.info());
-            console.log('📈 当前数据统计:', window.app.getStats());
-            console.log('💡 可用命令:', Object.keys(window.app));
-        }
+        }, 3000);
     </script>
+    <!-- AI Duel Subject Select Modal (这个HTML结构，不是JS，可以保留在body底部) -->
+    <div class="modal-overlay" id="aiDuelSubjectModal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>选择AI对决科目</h3>
+                <button class="modal-close" id="closeAiDuelSubjectModal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>请选择一个大科目进行AI对决：</p>
+                <select id="aiDuelSubjectSelect" style="width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    <!-- Options will be populated by JS -->
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="ai-btn secondary" id="cancelAiDuelSubject">取消</button>
+                <button class="ai-btn primary" id="confirmAiDuelSubject">开始对决</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

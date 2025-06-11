@@ -1,0 +1,500 @@
+/* css/statistics-manager.css */
+
+/* Statistics Page Styles */
+.statistics-page {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: var(--border-radius); /* Using CSS variable */
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+}
+
+.statistics-header { /* General header for review and statistics pages */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color-light); /* Using CSS variable */
+}
+
+.statistics-header h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.statistics-actions { /* Action buttons container for statistics */
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.time-range-select {
+    padding: 10px;
+    border-radius: var(--border-radius-sm); /* Using CSS variable */
+    border: 1px solid var(--border-color-light); /* Using CSS variable */
+    font-size: 0.9rem;
+    background: white;
+    box-sizing: border-box;
+}
+
+/* Overview Statistics Section */
+.overview-section {
+    margin-bottom: 30px;
+}
+
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted minwidth for more columns */
+    gap: 15px; /* Adjusted gap */
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--border-radius-md); /* Using CSS variable */
+    padding: 16px; /* Adjusted padding */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px; /* Adjusted gap */
+    border: 1px solid var(--border-color-light); /* Using CSS variable */
+    min-width: 0;
+    overflow: hidden;
+    min-height: 110px; /* Adjusted min-height */
+    box-sizing: border-box;
+    transition: var(--transition); /* Add transition for trend indicators */
+}
+
+/* Trend indicators (for overall accuracy) */
+.stat-card.trend-up { border-bottom: 4px solid var(--success-color); }
+.stat-card.trend-down { border-bottom: 4px solid var(--error-color); }
+.stat-card.trend-neutral { border-bottom: 4px solid var(--primary-color); }
+
+
+.stat-icon {
+    font-size: 1.8rem; /* Adjusted font size */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-bottom: 5px;
+}
+
+.stat-content {
+    flex: 1;
+    min-width: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.stat-content .stat-value {
+    font-size: 1.4rem; /* Adjusted font size */
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+    word-break: break-word;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    margin-bottom: 2px;
+}
+
+.stat-content .stat-label {
+    font-size: 0.85rem; /* Adjusted font size */
+    color: var(--text-muted);
+    line-height: 1.2;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+}
+.stat-explanation { /* Specific for accuracy card explanation */
+    font-size: 0.7em;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+
+/* Charts Section */
+.charts-section {
+    margin-bottom: 30px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusted minwidth */
+    gap: 20px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: var(--border-radius-md); /* Using CSS variable */
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    border: 1px solid var(--border-color-light); /* Using CSS variable */
+    overflow: hidden;
+    position: relative;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    box-sizing: border-box;
+}
+
+.chart-container canvas {
+    flex-grow: 1; /* Allow canvas to take available space */
+}
+
+.chart-container.wide {
+    grid-column: 1 / -1; /* Span full width */
+}
+
+/* Custom chart title for non-Chart.js (e.g., calendar heatmap) */
+.chart-title-custom {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+    padding: 5px 0 10px 0;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Calendar Heatmap specific styles (from original styles.css) */
+.calendar-heatmap-wrapper { /* Now direct target for #calendarChart */
+    width: 100%;
+    height: 100%; /* Fill parent container */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14px, 1fr));
+    grid-auto-rows: 14px;
+    gap: 3px;
+    padding: 5px;
+    flex-grow: 1;
+    overflow-y: auto;
+    align-content: flex-start;
+}
+.calendar-day{
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.06);
+    transition: background-color 0.3s;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+}
+
+.calendar-day:hover {
+    outline: 1px solid var(--primary-color);
+}
+
+/* Chart.js general styling (if needed outside of Chart.js options) */
+.chart-container .no-data {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: auto; /* Center in flex container */
+    width: 100%;
+}
+.chart-message { /* Added from QuizEngine's _showChartMessage */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9em;
+    z-index: 10;
+}
+.chart-message.chart-message-error {
+    color: var(--error-color);
+}
+
+
+/* Achievements Section */
+.achievements-section {
+    margin-top: 30px;
+}
+
+.achievements-list-container { /* New achievements list container (two-column) */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Use auto-fit for responsiveness */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.achievement-item {
+    display: flex;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color-light); /* Using CSS variable */
+    border-radius: var(--border-radius-sm);
+    padding: 12px 15px;
+    transition: var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-sizing: border-box;
+}
+
+.achievement-item.locked {
+    background-color: #f9fafb;
+    opacity: 0.85;
+}
+
+.achievement-item.unlocked {
+    background-color: rgba(var(--success-rgb), 0.1);
+    border-color: rgba(var(--success-rgb), 0.4);
+}
+
+.achievement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+}
+
+.achievement-item-icon {
+    font-size: 1.8rem;
+    margin-right: 15px;
+    flex-shrink: 0;
+    width: 35px;
+    text-align: center;
+    align-self: flex-start;
+    padding-top: 2px;
+}
+
+.achievement-item-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.achievement-item-name {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+.achievement-item.locked .achievement-item-name {
+    color: var(--text-secondary);
+}
+
+.achievement-item-description {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+/* Progress Bar for individual achievements */
+.achievement-item-progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: #e0e7ff;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.achievement-item-progress-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    transition: width 0.3s ease-out;
+}
+
+.achievement-item-progress-text {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.achievement-item-progress-text.done {
+    color: var(--success-color);
+    font-weight: 500;
+    font-size: 0.75em;
+}
+
+/* Overall achievements header */
+.achievements-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color-light); /* Using CSS variable */
+}
+
+.achievements-header h3 {
+    margin: 0;
+    font-size: 1.4em;
+    color: var(--text-primary);
+}
+
+.achievements-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.achievements-progress .progress-bar {
+    width: 150px;
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.achievements-progress .progress-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+}
+
+.achievements-progress .progress-text {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Responsive adjustments for statistics manager */
+@media (max-width: 1200px) {
+    .stats-overview {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+    }
+    .stat-card {
+        padding: 14px;
+        gap: 6px;
+        min-height: 100px;
+    }
+    .stat-icon {
+        width: 45px; height: 45px; font-size: 1.6rem;
+    }
+    .stat-content .stat-value { font-size: 1.3rem; }
+    .stat-content .stat-label { font-size: 0.8rem; }
+
+    .charts-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 15px;
+    }
+    .chart-container {
+        height: 280px;
+    }
+    .achievements-list-container {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .statistics-page { padding: 20px; }
+    .statistics-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .statistics-header h2 { font-size: 1.5rem; }
+    .statistics-actions { width: 100%; justify-content: space-between; }
+    .time-range-select { flex-grow: 1; }
+    .action-btn { flex-grow: 1; justify-content: center; padding: 8px 15px; font-size: 0.85rem; }
+
+    .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .stat-card {
+        padding: 12px;
+        gap: 5px;
+        min-height: 90px;
+    }
+    .stat-icon {
+        width: 40px; height: 40px; font-size: 1.4rem;
+    }
+    .stat-content .stat-value { font-size: 1.2rem; }
+    .stat-content .stat-label { font-size: 0.75rem; }
+
+    .charts-grid {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        gap: 15px;
+    }
+    .chart-container {
+        height: 250px;
+        padding: 10px;
+    }
+    .calendar-grid {
+        grid-template-columns: repeat(auto-fit, minmax(12px, 1fr));
+        grid-auto-rows: 12px;
+        gap: 2px;
+    }
+    .achievements-list-container {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        gap: 12px;
+    }
+    .achievement-item {
+        padding: 10px 12px;
+    }
+    .achievement-item-icon {
+        font-size: 1.6rem;
+        margin-right: 12px;
+        width: 30px;
+    }
+    .achievement-item-name { font-size: 0.95em; }
+    .achievement-item-description { font-size: 0.75em; }
+    .achievement-item-progress-bar { max-width: 150px; }
+    .achievements-header h3 { font-size: 1.3em; }
+    .achievements-progress .progress-bar { width: 120px; }
+    .achievements-progress .progress-text { font-size: 0.8em; }
+}
+
+@media (max-width: 480px) {
+    .statistics-page { padding: 15px; }
+    .statistics-header h2 { font-size: 1.3rem; }
+    .stats-overview {
+        grid-template-columns: 1fr; /* Single column on very small screens */
+        gap: 8px;
+    }
+    .stat-card {
+        padding: 10px;
+        gap: 4px;
+        min-height: 80px;
+    }
+    .stat-icon {
+        width: 35px; height: 35px; font-size: 1.2rem;
+    }
+    .stat-content .stat-value { font-size: 1.1rem; }
+    .stat-content .stat-label { font-size: 0.7rem; }
+
+    .charts-grid { gap: 10px; }
+    .chart-container { height: 200px; padding: 8px; }
+
+    .achievements-list-container { gap: 10px; }
+    .achievement-item { padding: 8px 10px; }
+    .achievement-item-icon { font-size: 1.4rem; margin-right: 10px; width: 25px; }
+    .achievement-item-name { font-size: 0.9em; }
+    .achievement-item-description { font-size: 0.7em; }
+    .achievement-item-progress-bar { height: 5px; }
+    .achievement-item-progress-text { font-size: 0.65rem; }
+    .achievements-header h3 { font-size: 1.2em; }
+    .achievements-progress .progress-bar { width: 100px; height: 8px; }
+    .achievements-progress .progress-text { font-size: 0.7em; }
+}

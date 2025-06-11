@@ -1,0 +1,107 @@
+/* css/layout.css */
+
+/* Define sidebar width as a CSS variable for easier management */
+:root {
+    --sidebar-width-desktop: 480px;
+    --sidebar-width-mobile: 100%; /* For mobile overlay */
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    padding: 20px;
+    max-width: 1300px; /* Original max-width */
+    margin-left: auto;
+    margin-right: auto;
+    /* MODIFIED: Transition for margin-right now */
+    transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), /* Added for smooth reset */
+                /* Remove max-width and width from transition if we don't change them */
+                /* max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), */
+                /* width 0.3s cubic-bezier(0.4, 0, 0.2, 1); */
+                opacity 0.3s ease; /* Added for smoother visual if needed */
+}
+
+/* MODIFIED: When sidebar is active (on desktop screens), shift the main container */
+html.sidebar-active .container {
+    /* Keep margin-left: auto from the default .container rule for centering. */
+    /* No need to repeat it here unless overriding a more specific rule. */
+
+    /* Adjust margin-right to make space for the sidebar and the container's own right padding. */
+    margin-right: calc(var(--sidebar-width-desktop) + 20px);
+
+    /*
+    Remove explicit max-width reduction and width setting.
+    The container will naturally shrink if the available space (viewport_width - new_margin_right - what_margin_left_auto_becomes)
+    is less than its original max-width (1300px).
+    This approach correctly shifts the container's center to the left and allows it to use
+    its full potential width (up to 1300px) in the space remaining to the left of the sidebar.
+    */
+    /* max-width: calc(1300px - var(--sidebar-width-desktop) - 20px); /* REMOVE THIS LINE */
+    /* width: calc(100% - var(--sidebar-width-desktop) - 20px - 20px); /* REMOVE THIS LINE */
+}
+
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 50px;
+    padding: 40px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    /* NEW: Add transition for smooth shifting (if it's inside container, it might inherit) */
+    transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    color: white;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.header p {
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 600px;
+    margin: 0 auto;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content Area */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* css/layout.css */
+
+/* ... 你已有的页脚样式 ... */
+
+/* 新增：页脚链接式按钮样式 */
+.footer-link-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color); /* 使用主题色，看起来像链接 */
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    font-size: 0.9em;
+    margin-left: 20px; /* 与版权信息隔开一些距离 */
+    font-family: inherit; /* 继承页脚字体 */
+}
+
+.footer-link-btn:hover,
+.footer-link-btn:focus {
+    color: var(--secondary-color); /* 鼠标悬停时变色 */
+    outline: none;
+}

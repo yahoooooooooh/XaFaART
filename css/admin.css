@@ -1,0 +1,820 @@
+--- START OF FILE css/admin.css ---
+
+/* css/admin.css */
+
+/* Admin Panel - General Form Styles (if any part of admin-form is still used) */
+.admin-form { /* This section was commented out in HTML, but kept here for completeness */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.admin-form label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.admin-form input, .admin-form select, .admin-form textarea {
+    padding: 12px;
+    border: 2px solid var(--border-color-light); /* Using CSS variable */
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+.admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.admin-form button { /* Applies to submit buttons within forms */
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.admin-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Admin Panel - AI Assistant Section */
+.ai-assistant-section {
+    background: linear-gradient(135deg, rgba(74, 105, 132, 0.05), rgba(184, 155, 114, 0.04));
+    border: 1px solid var(--border-color-light);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 0 0 25px 0;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ai-assistant-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.ai-assistant-section h4 {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-section-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.prompt-builder {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.prompt-builder h5 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-row { /* Used within prompt-builder */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.form-col { /* Used within form-row */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0; /* MODIFIED: Added min-width: 0 for flex item shrinking */
+}
+
+.form-col label { /* Specific labels for form-col */
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.form-col input, .form-col select { /* Specific inputs for form-col */
+    padding: 10px 12px;
+    border: 1px solid var(--border-color-light); /* Using CSS variable */
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0; /* MODIFIED: Ensure inputs can shrink */
+    color: var(--text-primary); /* Ensure text color is set */
+}
+
+.form-col input:focus, .form-col select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(74, 105, 132, 0.1);
+}
+
+/* Responsive adjustment for admin panel form-row */
+@media (min-width: 500px) {
+    .sidebar-section#adminPanelSection .prompt-builder .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        flex-direction: row;
+    }
+}
+
+
+.ai-buttons { /* Button group within AI assistant */
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap; /* Allow buttons to wrap */
+}
+
+/* --- KEY CHANGE: Updated .ai-btn styles to use theme variables --- */
+.ai-btn { /* ADDED: Common base style for all ai-btn */
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    font-family: inherit;
+    color: white;
+}
+
+.ai-btn.primary {
+    background: var(--primary-color);
+    box-shadow: var(--shadow-card);
+}
+
+.ai-btn.primary:hover {
+    transform: translateY(-2px);
+    background: var(--primary-hover);
+    box-shadow: var(--shadow-hover);
+}
+
+.ai-btn.secondary {
+    background: var(--secondary-color);
+    box-shadow: var(--shadow-card);
+}
+
+.ai-btn.secondary:hover {
+    transform: translateY(-2px);
+    background: #c9ad8a; /* A slightly lighter version of the gold */
+    box-shadow: var(--shadow-hover);
+}
+/* --- END OF KEY CHANGE --- */
+
+.ai-tips {
+    background: rgba(90, 135, 106, 0.1); /* Use success color */
+    border: 1px solid rgba(90, 135, 106, 0.2);
+    border-radius: 6px;
+    padding: 12px 15px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.ai-tips p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.ai-tips p:first-child {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Multi-row Prompt Builder */
+#multiPromptRows { /* Container for the rows */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between rows */
+}
+
+.prompt-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2.5fr) minmax(0, 2.5fr) minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 0;
+}
+.prompt-row select,
+.prompt-row input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color-light);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+    color: var(--text-primary);
+    background-color: white;
+    min-width: 0;
+}
+.prompt-row input[type="number"] {
+    text-align: center;
+}
+
+.prompt-row .remove-row {
+    background: #fde8e8;
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1rem;
+    transition: var(--transition);
+    height: 37px;
+    width: 37px;
+    flex-shrink: 0;
+}
+.prompt-row .remove-row:hover {
+    background: #fbdada;
+}
+
+.sidebar-section#adminPanelSection .prompt-builder h5 + .form-row,
+.sidebar-section#adminPanelSection .prompt-builder h5 + div > .form-row {
+    /* No styles needed here currently */
+}
+
+
+/* Backup & Storage Sections */
+.backup-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+}
+
+.backup-section h4 {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.backup-section button {
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    font-weight: 500;
+    box-sizing: border-box;
+}
+
+.backup-section button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+}
+
+.quiz-data-editor { /* This section was commented out in HTML */
+    margin-top: 20px;
+}
+
+.quiz-data-editor textarea {
+    width: 100%;
+    height: 200px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius-md);
+    padding: 12px;
+    background: white;
+    color: var(--text-primary);
+}
+
+.quiz-list {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    box-sizing: border-box;
+}
+
+.quiz-list h4 {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.quiz-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+}
+
+.quiz-item:last-child {
+    border-bottom: none;
+}
+
+.quiz-item:hover {
+    background: var(--bg-card);
+}
+
+.delete-btn, .edit-btn {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-left: 5px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.delete-btn {
+    background: var(--error-color);
+    color: white;
+}
+
+.edit-btn {
+    background: var(--primary-color);
+    color: white;
+}
+.delete-btn:hover, .edit-btn:hover {
+    opacity: 0.8;
+}
+
+/* Backup List */
+.adminBackupListContainer {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color-light);
+    border-radius: 6px;
+    background: white;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
+.backup-list {
+    /* Styles for the list itself */
+}
+
+.backup-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.backup-item:last-child {
+    border-bottom: none;
+}
+
+.backup-item:hover {
+    background: #f8fafc;
+}
+
+.backup-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.backup-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.backup-meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.backup-actions button {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.backup-restore {
+    background: var(--primary-color);
+    color: white;
+}
+
+.backup-delete {
+    background: var(--error-color);
+    color: white;
+}
+
+.backup-actions button:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+}
+
+/* Storage Status Section */
+.storage-status-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+}
+
+.storage-status-section h4 {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.storage-info-grid {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    border: 1px solid var(--border-color-light);
+    box-sizing: border-box;
+}
+
+.storage-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.storage-info-item:last-child {
+    border-bottom: none;
+}
+
+.storage-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.storage-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.storage-value.storage-good {
+    color: var(--success-color);
+    background: rgba(90, 135, 106, 0.1);
+}
+
+.storage-value.storage-warning {
+    color: var(--warning-color);
+    background: rgba(199, 135, 67, 0.1);
+}
+
+.storage-value.storage-critical {
+    color: var(--error-color);
+    background: rgba(192, 95, 95, 0.1);
+}
+
+.storage-value.storage-fallback {
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Storage Usage Bar */
+.storage-usage-bar {
+    width: 100%;
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+    position: relative;
+}
+
+.storage-usage-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 4px;
+}
+
+.storage-usage-fill.storage-good {
+    background: linear-gradient(90deg, var(--success-color), #85b095);
+}
+
+.storage-usage-fill.storage-warning {
+    background: linear-gradient(90deg, var(--warning-color), #d9a066);
+}
+
+.storage-usage-fill.storage-critical {
+    background: linear-gradient(90deg, var(--error-color), #d18a8a);
+}
+
+/* Storage Warnings & Recommendations */
+.storage-warnings {
+    margin-top: 10px;
+    padding: 12px;
+    background: rgba(199, 135, 67, 0.1);
+    border: 1px solid rgba(199, 135, 67, 0.2);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.storage-warnings strong {
+    color: var(--warning-color);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.storage-warnings ul {
+    margin: 5px 0 0 15px;
+    color: var(--text-secondary);
+    list-style: disc;
+}
+
+.storage-warnings li {
+    margin-bottom: 3px;
+}
+
+/* Storage Details (stores breakdown) */
+.storage-stores {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(74, 105, 132, 0.05);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.storage-stores strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.storage-store-item {
+    padding: 3px 0;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.storage-store-item:last-child {
+    border-bottom: none;
+}
+
+/* Storage Buttons */
+.storage-status-section button {
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    font-weight: 500;
+    box-sizing: border-box;
+}
+
+.storage-status-section button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+}
+
+.storage-status-section button:active {
+    transform: translateY(0);
+}
+
+/* Storage Status Indicator Animation */
+@keyframes storageStatusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.storage-value.storage-critical {
+    animation: storageStatusPulse 2s infinite;
+}
+
+/* API Usage Stats (Moved from index.html) */
+.api-usage-stats-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+}
+
+.api-usage-stats-container h4 {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-size: 1.05em;
+}
+
+.api-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.api-stat-item strong {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.api-progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: var(--border-color-light);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.api-progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary-color); /* Default color */
+    border-radius: 5px;
+    transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    text-align: center;
+    color: white;
+    font-size: 0.7em;
+    line-height: 10px;
+}
+
+.api-progress-bar-fill.low-usage { background-color: var(--success-color); }
+.api-progress-bar-fill.medium-usage { background-color: var(--warning-color); }
+.api-progress-bar-fill.high-usage { background-color: var(--error-color); }
+
+
+/* Responsive Admin Panel */
+@media (max-width: 768px) {
+    .sidebar-section#adminPanelSection {
+        width: 100%; 
+        padding: 20px;
+    }
+    .sidebar-section#adminPanelSection .prompt-builder .form-row {
+        grid-template-columns: 1fr; 
+        gap: 10px;
+    }
+    .ai-buttons {
+        flex-direction: column; 
+    }
+    .prompt-row { 
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .prompt-row select, .prompt-row input[type="number"] {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    .prompt-row .remove-row {
+        height: 41px;
+        width: 100%;
+        margin-top: 5px;
+    }
+    .backup-section, .storage-status-section {
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .storage-info-item { 
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .storage-value {
+        align-self: flex-end; 
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar-section#adminPanelSection {
+        padding: 15px;
+    }
+    .sidebar-section#adminPanelSection h3 {
+        font-size: 1.3rem;
+    }
+    .admin-form button {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+    .ai-assistant-section {
+        padding: 15px;
+    }
+    .ai-assistant-section h4 {
+        font-size: 1.1rem;
+    }
+    .ai-section-desc {
+        font-size: 0.8rem;
+    }
+    .prompt-builder {
+        padding: 12px;
+    }
+    .prompt-builder h5 {
+        font-size: 1rem;
+    }
+    .ai-tips {
+        font-size: 0.75rem;
+    }
+    .backup-section h4, .quiz-list h4, .storage-status-section h4 {
+        font-size: 1.1rem;
+    }
+    .quiz-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        font-size: 0.8rem;
+    }
+    .quiz-item div:first-child {
+        width: 100%;
+        text-align: left;
+    }
+    .quiz-item div:last-child {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 5px;
+    }
+    .delete-btn, .edit-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    .storage-info-grid {
+        padding: 10px;
+    }
+    .storage-warnings, .storage-stores {
+        font-size: 0.75rem;
+        padding: 8px;
+    }
+}
